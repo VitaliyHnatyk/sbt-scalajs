@@ -4,11 +4,15 @@ organization := "com.github.inthenow"
 
 name := "sbt-scalajs"
 
-version := "0.5.5.0"
+version := "0.5.6"
 
 scalaVersion := "2.10.4"
 
 scalacOptions ++= Seq("-deprecation", "-unchecked")
+
+releaseSettings
+
+//release-use-global-version := false
 
 resolvers ++= Seq(
   Resolver.sbtPluginRepo("releases"),

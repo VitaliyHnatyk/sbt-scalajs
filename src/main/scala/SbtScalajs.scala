@@ -19,10 +19,18 @@ object SbtScalajs extends AutoPlugin {
 
   val postScalaJSSettings = {
     Seq(
-      ScalaJSKeys.fastOptJS in Compile <<= (ScalaJSKeys.fastOptJS in Compile) dependsOn (compile in Compile) triggeredBy (compile in Compile),
-      ScalaJSKeys.fastOptJS in Test <<= (ScalaJSKeys.fastOptJS in Test) dependsOn (fastOptJS in Compile) triggeredBy (compile in Test)
     )
   }
+
+  val compileAutoOpt = Seq(
+    ScalaJSKeys.fastOptJS in Compile <<= (ScalaJSKeys.fastOptJS in Compile) dependsOn (compile in Compile) triggeredBy (compile in Compile)
+  )
+
+  val testAutoOpt = Seq(
+    ScalaJSKeys.fastOptJS in Test <<= (ScalaJSKeys.fastOptJS in Test) dependsOn (fastOptJS in Compile) triggeredBy (compile in Test)
+  )
+
+  val autoOpt = compileAutoOpt ++ testAutoOpt
 
   override def projectSettings =
     preScalaJSSettings ++ postScalaJSSettings ++
@@ -34,21 +42,21 @@ object SbtScalajs extends AutoPlugin {
     publishLocal := {}
   )
 
-  def shareDirectories(that: Project, dir: String ) = Seq(
+  def shareDirectories(that: Project, dir: String) = Seq(
     // pseudo link shared files from jvm source/resource directories to js
-    unmanagedSourceDirectories   in Compile += (baseDirectory in that).value / "src/main/scala" / dir,
-    unmanagedSourceDirectories   in Test    += (baseDirectory in that).value / "src/test/scala" / dir,
+    unmanagedSourceDirectories in Compile += (baseDirectory in that).value / "src/main/scala" / dir,
+    unmanagedSourceDirectories in Test += (baseDirectory in that).value / "src/test/scala" / dir,
     unmanagedResourceDirectories in Compile += (baseDirectory in that).value / "src/main/resources" / dir,
-    unmanagedResourceDirectories in Test    += (baseDirectory in that).value / "src/test/resources" / dir
+    unmanagedResourceDirectories in Test += (baseDirectory in that).value / "src/test/resources" / dir
 
   )
 
   def addDirectories(base: File, dir: String = ".") = Seq(
     // pseudo link shared files from jvm source/resource directories to js
-    unmanagedSourceDirectories   in Compile += base / "src/main/scala" / dir,
-    unmanagedSourceDirectories   in Test    += base / "src/test/scala" / dir,
+    unmanagedSourceDirectories in Compile += base / "src/main/scala" / dir,
+    unmanagedSourceDirectories in Test += base / "src/test/scala" / dir,
     unmanagedResourceDirectories in Compile += base / "src/main/resources" / dir,
-    unmanagedResourceDirectories in Test    += base / "src/test/resources" / dir
+    unmanagedResourceDirectories in Test += base / "src/test/resources" / dir
 
   )
 
@@ -73,5 +81,5 @@ object SbtScalajs extends AutoPlugin {
   )
 
   val scalajsJvmSettings = Seq(target := target.value / "jvm")
-  val scalajsJsSettings  = Seq(target := target.value / "js")
+  val scalajsJsSettings = Seq(target := target.value / "js")
 }
