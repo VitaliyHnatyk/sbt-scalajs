@@ -71,12 +71,13 @@ object SbtScalajs extends AutoPlugin {
   def sjsResources(prjJs: Project) = Seq(
     unmanagedResourceDirectories in Compile += (crossTarget in fastOptJS in Compile in prjJs).value,
     unmanagedResourceDirectories in Test += (crossTarget in fastOptJS in Test in prjJs).value,
-    unmanagedResources in Test += ((packageJSDependencies in Compile) in prjJs).value,
+    unmanagedResources in Compile += ((packageJSDependencies in Compile) in prjJs).value,
     unmanagedResources in Test += ((packageJSDependencies in Test) in prjJs).value,
     unmanagedResources in Compile += ((artifactPath in fastOptJS in Compile) in prjJs).value,
     unmanagedResources in Test += ((artifactPath in fastOptJS in Compile) in prjJs).value,
     unmanagedResources in Test += ((artifactPath in fastOptJS in Test) in prjJs).value,
 
+    copyResources in Compile <<= (copyResources in Compile) dependsOn (fastOptJS in Compile in prjJs),
     copyResources in Test <<= (copyResources in Test) dependsOn (fastOptJS in Test in prjJs)
   )
 

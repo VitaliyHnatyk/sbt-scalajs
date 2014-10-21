@@ -1,4 +1,5 @@
 import sbtrelease.ReleasePlugin.ReleaseKeys._
+import bintray.Keys._
 
 sbtPlugin := true
 
@@ -6,13 +7,11 @@ organization := "com.github.inthenow"
 
 name := "sbt-scalajs"
 
+version := "0.55.0"
+
 scalaVersion := "2.10.4"
 
 scalacOptions ++= Seq("-deprecation", "-unchecked")
-
-releaseSettings
-
-useGlobalVersion := false
 
 resolvers ++= Seq(
   Resolver.sbtPluginRepo("releases"),
@@ -32,31 +31,20 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-web" % "1.1.0")
 
 //addSbtPlugin("com.typesafe.sbt" % "sbt-js-engine" % "1.0.1")
 
-publishMavenStyle := true
+publishMavenStyle := false
 
 publishArtifact in Test := false
 
-publishTo := {
-  val nexus = "http://johnsonusm.com:8020/nexus/"
-  if (isSnapshot.value)
-    Some("Sonatype Snapshots" at nexus + "content/repositories/snapshots/")
-  else
-    Some("Sonatype Snapshots" at nexus + "content/repositories/releases/")
-}
+bintrayPublishSettings
 
-pomIncludeRepository := { _ => false}
+repository in bintray := "sbt-plugins"
 
-pomExtra := <url>https://github.com/InTheNow</url>
-  <developers>
-    <developer>
-      <id>Alistair</id>
-      <name>Johnson</name>
-      <url>https://github.com/InTheNow</url>
-    </developer>
-  </developers>
-  <scm>
-    <url>git@github.com:InTheNow/sbt-scalajs.git</url>
-    <connection>git@github.com:InTheNow/sbt-scalajs.git</connection>
-  </scm>
+licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html"))
 
-licenses +=("Apache License, Version 2.0", url("http://www.apache.org/licenses/LICENSE-2.0"))
+bintrayOrganization in bintray := None
+
+releaseSettings
+
+useGlobalVersion := true
+
+
