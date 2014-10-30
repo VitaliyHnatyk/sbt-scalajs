@@ -7,8 +7,6 @@ organization := "com.github.inthenow"
 
 name := "sbt-scalajs"
 
-version := "0.55.0"
-
 scalaVersion := "2.10.4"
 
 scalacOptions ++= Seq("-deprecation", "-unchecked")
@@ -45,6 +43,5 @@ bintrayOrganization in bintray := None
 
 releaseSettings
 
-useGlobalVersion := true
 
 
