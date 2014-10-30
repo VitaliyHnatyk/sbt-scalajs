@@ -1,0 +1,150 @@
+@(message: String)
+
+@main("Scala.js", "A Scala to JavaScript compiler") {
+
+	<p><a href="https://travis-ci.org/scala-js/scala-js"><img src="https://travis-ci.org/scala-js/scala-js.png?branch=master" alt="Build Status" /></a></p>
+
+
+<!--
+
+
+
+-->
+<div id="playground"> </div>
+<div id="playground-rjs"> </div>
+<div id="playground-ui"> </div>
+<div id="playground-ui-code"> </div>
+  
+  <script type="text/javascript" src="@routes.Assets.at("javascripts/ExPublic.js")"></script>
+<script type="text/javascript" src="@routes.Assets.at("javascripts/ExamplePureJS.js")"></script>
+<script type="text/javascript" src="@routes.Assets.at("javascripts/ExamplePureCoffee.js")"></script>
+<script type="text/javascript" src="@routes.Assets.at("javascripts/ExamplePureReactNoJsx.js")"></script>
+<script type="text/javascript">examplePureReactNoJsx();examplePureJS(); examplePureCoffee (); </script>
+
+<script type="text/javascript">ScalaJSExample().main()</script>
+<script type="text/javascript">ScalaJSExample().reactExample()</script>
+<!--
+<script type="text/javascript">ScalaJS.modules.scalajs_example_ScalaJSExample().main()</script>
+<script type="text/javascript">ScalaJS.modules.scalajs_example_ScalaJSExample().reactExample()</script>
+-->
+
+ <div class="google-maps" id="map_canvas" style="width: 100%; height: 50%"></div>
+
+
+	<p>Scala.js compiles Scala code to JavaScript, allowing you to write your Web application entirely in Scala!</p>
+	<p><b><span style='color: red'>Important notice!</span></b> Scala.js is still <i>experimental</i>!
+	Although this is a project of LAMP/EPFL for which we will continue to provide
+	best-effort improvements and bug fixes, it is <i>not</i> supported by TypeSafe,
+	and not part of any of their support contracts. You have been warned!</p>
+	<p>Outstanding features are:</p>
+
+	<ul>
+	  <li>Support all of Scala (including macros!), modulo <a href="http://www.scala-js.org/doc/semantics.html">a few semantic differences</a></li>
+
+	  <li>Very good <a href="http://www.scala-js.org/doc/js-interoperability.html">interoperability with JavaScript code</a>. For example, use jQuery and HTML5 from your Scala.js code, either in a typed or untyped way. Or create Scala.js objects and call their methods from JavaScript.</li>
+
+	  <li>Integrated with <a href="http://www.scala-sbt.org/">sbt</a> (including support for dependency management and incremental compilation)</li>
+
+	  <li>Can be used with your favorite IDE for Scala</li>
+
+	  <li>Generates <a href="http://www.html5rocks.com/en/tutorials/developertools/sourcemaps/">Source Maps</a> for a smooth debugging experience (step through your Scala code from within your browser supporting source maps)</li>
+
+	  <li>Integrates <a href="https://developers.google.com/closure/compiler/">Google Closure Compiler</a> for producing minimal code for production.</li>
+
+	</ul>
+
+<h2 id="get_started">Get started</h2>
+
+	<p>The easiest way to get started is to fork the <a href="https://github.com/sjrd/scala-js-example-app">bootstrapping skeleton</a> and follow the instructions in its readme.</p>
+
+<h2 id="resources">Resources</h2>
+
+	<ul>
+	<li><a href="./doc/">Documentation</a></li>
+
+	<li><a href="https://groups.google.com/forum/?fromgroups#!forum/scala-js">Official mailing list</a></li>
+
+	<li><a href="http://skillsmatter.com/podcast/scala/scala-js-write-in-scala-for-the-browser-4567">Live-coding with Scala.js at Scala eXchange 2013</a></li>
+
+	<li><a href="http://www.parleys.com/play/51c380bfe4b0ed8770356866">Presentation of Scala.js at Scala Days 2013</a> (older and somewhat obsolete)</li>
+	</ul>
+
+<h2 id="useful_links">Useful links</h2>
+
+	<h4 id="libraries">Libraries</h4>
+
+		<ul>
+			<li><p><a href="https://github.com/scala-js/scala-js-dom">Static types for the DOM API</a>, by Haoyi Li</p> </li>
+
+			<li> <p><a href="https://github.com/scala-js/scala-js-jquery">Static types for jQuery</a>, brought to you by Sébastien Doeraene </p>  </li>
+		</ul>
+
+	<h4 id="tools">Tools</h4>
+
+		<ul>
+			<li><a href="https://github.com/lihaoyi/scala-js-workbench">Scala.js workbench</a>, an sbt plugin for Scala.js projects to make development in the browser more pleasant, by Haoyi Li</li>
+		</ul>
+
+		<h4 id="miscellaneous">Miscellaneous</h4>
+
+		<ul>
+			<li><a href="https://github.com/jonas/scalajs-benchmarks">Port of the Dart benchmark harness</a> by Jonas Fonseca</li>
+		</ul>
+
+<h2 id="contribute">Contribute</h2>
+
+	<ul>
+	<li><a href="https://github.com/scala-js/scala-js">Scala.js on GitHub</a></li>
+	</ul>
+
+	<p>Want to contribute to Scala.js? Check out the <a href="./contribute/">list of contributing opportunities</a>.</p>
+
+<h2 id="built_with_scalajs">Built with Scala.js</h2>
+
+	<p>Beginning a list of websites using Scala.js:</p>
+
+	<ul>
+		<li><p>October 2013</p>
+			<ul>
+				<li><a href="http://lihaoyi.github.io/scala-js-games/">Several games</a> by Haoyi Li</li>
+			</ul>
+		</li>
+
+		<li><p>July 2013</p>
+			<ul>
+				<li><a href="http://krishnanraman.github.io/scala-js/examples/helloworld/helloworld.html">Knapsack on a graph</a> by Krishnan Raman</li>
+			</ul>
+		</li>
+
+		<li><p>June 2013</p>
+			<ul>
+				<li><a href="http://collidium.shadaj.me/">Collidium Online</a> by <a href="https://twitter.com/ShadajL">@@ShadajL</a></li>
+			</ul>
+		</li>
+
+		<li><p>April 2013</p>
+			<ul>
+				<li>The <a href="/examples/reversi/">Reversi</a> example by myself</li>
+			</ul>
+		</li>
+	</ul>
+  <!--
+<h2 id="works_with_react">Works with react.js too</h2>
+   
+ 
+  <div id="example">
+  <script type="text/javascript">ScalaJS.modules.example_ScalaJSExample().helloReact();</script>
+  
+     
+</div>
+    
+  
+    <script type="text/javascript" src='routes.Assets.at("javascripts/JSXTransformer.js")'></script>
+    <script type="text/jsx" src='routes.Assets.at("javascripts/_HelloReact.js")'></script>
+    -->
+
+<a href="https://github.com/scala-js/scala-js-website"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png" alt="Fork me on GitHub"></a>
+
+
+
+}

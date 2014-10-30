@@ -13,7 +13,9 @@ object SbtScalajs extends AutoPlugin {
   val preScalaJSSettings = {
     Seq(
       (crossTarget in fastOptJS) in Compile := (crossTarget in Compile).value / "scalajs_managed" / "js",
-      (crossTarget in fastOptJS) in Test := (crossTarget in Test).value / "scalajs_managed" / "js"
+      (crossTarget in fastOptJS) in Test := (crossTarget in Test).value / "scalajs_managed" / "js",
+      (crossTarget in packageJSDependencies) in Compile := (crossTarget in Compile).value / "scalajs_managed" / "js",
+      (crossTarget in packageJSDependencies) in Test := (crossTarget in Test).value / "scalajs_managed" / "js"
     )
   } ++ scalaJSSettings
 
@@ -79,6 +81,10 @@ object SbtScalajs extends AutoPlugin {
 
     copyResources in Compile <<= (copyResources in Compile) dependsOn (fastOptJS in Compile in prjJs),
     copyResources in Test <<= (copyResources in Test) dependsOn (fastOptJS in Test in prjJs)
+  )
+
+  val concatAllSjsDependencies  = Seq(
+    skip in ScalaJSKeys.packageJSDependencies := false
   )
 
   val scalajsJvmSettings = Seq(target := target.value / "jvm")

@@ -34,6 +34,10 @@ object SbtScalajsWeb extends AutoPlugin {
 
   )
 
+  val sjsPlaySettings = Seq(
+    unmanagedResourceDirectories in Assets ++= (unmanagedResourceDirectories in Compile).value
+  )
+
   val preScalaJSSettings = SbtScalajs.preScalaJSSettings
 
   val postScalaJSSettings = SbtScalajs.postScalaJSSettings
@@ -69,8 +73,11 @@ object SbtScalajsWeb extends AutoPlugin {
     )
   }
 
+  /*
   override def projectSettings =
     preSbtWebSettings ++ SbtWeb.projectSettings ++ preScalaJSSettings ++ postSbtWebSettings ++ postScalaJSSettings ++
       Seq(
       )
+
+      */
 }

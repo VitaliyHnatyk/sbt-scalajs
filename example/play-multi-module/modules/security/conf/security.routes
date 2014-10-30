@@ -1,0 +1,24 @@
+# Routes
+# This file defines all LoginController routes (Higher priority routes first)
+# ~~~~
+
+GET     /                           controllers.security.LoginController.login()
+GET     /login                      controllers.security.LoginController.login()
+GET     /theForm                    controllers.security.LoginController.theForm()
+GET     /facebook/index.html        controllers.security.LoginController.facebookIndex()
+GET     /twitter/index.html         controllers.security.LoginController.twitterIndex()
+GET     /form/index.html            controllers.security.LoginController.formIndex()
+GET     /form/index.html.json       controllers.security.LoginController.formIndexJson()
+GET     /basicauth/index.html       controllers.security.LoginController.basicauthIndex()
+GET     /cas/index.html             controllers.security.LoginController.casIndex()
+GET     /google-openid/index.html   controllers.security.LoginController.googleOpenIdIndex()
+POST    /google-openid/index.html   controllers.security.LoginController.googleOpenIdIndex()
+GET     /callback                   org.pac4j.play.CallbackController.callback()
+POST    /callback                   org.pac4j.play.CallbackController.callback()
+GET     /casProxyCallback           org.pac4j.play.CallbackController.callback()
+POST    /casProxyCallback           org.pac4j.play.CallbackController.callback()
+GET     /logout                     org.pac4j.play.CallbackController.logoutAndRedirect()
+
+# Map static resources from the /public folder to the /assets URL path
+GET     /assets/*file               controllers.security.Assets.at(path="/public", file)
+GET     /webjars/*file              controllers.security.WebJarAssets.at(file)

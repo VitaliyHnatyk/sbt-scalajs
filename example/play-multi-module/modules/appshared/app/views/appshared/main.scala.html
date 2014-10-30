@@ -1,0 +1,97 @@
+@(title: String, tagline: String = "")(content: Html)
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
+ 
+ <style type="text/css">
+      html { height: 100% }
+      body { height: 100%; margin: 0; padding: 0 }
+  .container-narrow, .row-fluid, .span12 { height: 100% }
+    </style>    
+    <title>@title</title>
+    <link rel='shortcut icon' type='image/png' href="@controllers.appshared.routes.Assets.at("images/scala-js-logo-32.png")">
+    <link rel='stylesheet' href='@controllers.appshared.routes.WebJarAssets.at(WebJarAssets.locate("bootstrap.min.css"))'>
+     <link rel='stylesheet' href='@controllers.appshared.routes.Assets.at("stylesheets/style.css")'>
+  
+ 
+    
+     <script type='text/javascript' src='@controllers.appshared.routes.WebJarAssets.at(WebJarAssets.locate("jquery.js"))'></script>
+    
+    <!--
+     <scr  ipt type="text/javascript" src='routes.Assets.at("javascripts/react.js")'></script>
+   
+   .container-narrow, .row-fluid, .span12 { height: 100% }
+    
+     if(Play.application.isTest()) {
+       <scr   ipt type="text/javascript" src="routes.ExternalAssets.at("scala-js-website-test.js")"></script>
+     }
+     
+      
+     if(Play.application.isTest()) {
+       <scri  pt type='text/javascript' src='routes.WebJarAssets.at(WebJarAssets.locate("jasmine.js"))'></script>
+     }
+     
+     
+     <script type="text/javascript" src="@controllers.appshared.routes.Assets.at("javascripts/ui-extdeps.js")"></script>
+     <script type="text/javascript" src="@controllers.appshared.routes.Assets.at("javascripts/ui-intdeps.js")"></script>
+     <script type="text/javascript" src="@controllers.appshared.routes.Assets.at("javascripts/ui.js")"></script>   
+    -->
+     
+    
+   
+  
+          <script type='text/javascript' src='@controllers.appshared.routes.WebJarAssets.at(WebJarAssets.locate("react.js"))'></script>
+  
+  <script type="text/javascript" src="@controllers.appshared.routes.Assets.at("lib/appshared/ui-jsdeps.js")"></script>
+  <script type="text/javascript" src="@controllers.appshared.routes.Assets.at("lib/appshared/ui-fastopt.js")"></script>
+  
+   <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAmO0aXPIADLV70qtX1WH5wXmfch0gwsac&sensor=true"></script>
+ 
+ <script type="text/javascript">
+      function initialize() {
+        var mapOptions = {
+         center: new google.maps.LatLng(0, 0),
+          zoom: 8,
+          mapTypeId: google.maps.MapTypeId.SATELLITE
+        };
+        var map = new google.maps.Map(document.getElementById("map_canvas"),
+            mapOptions);
+        var ctaLayer = new google.maps.KmlLayer('file:////home/alistair/prj/git/ws/scala-js-website/play/public/county.xml');
+        ctaLayer.setMap(map);
+      };
+      google.maps.event.addDomListener(window, 'load', initialize);
+    </script>
+    
+  
+</head>
+<body >
+    <div class="navbar ">
+        <div class="navbar-inner">
+            <div class="container-narrow">
+                <a class="brand" href="/"><img src='@controllers.appshared.routes.Assets.at("images/scala-js-logo-32.png")' alt="Scala.js logo" /> Scala.js</a>                                         
+                <a href="/login"><button type="submit" class="btn btn-success pull-right">Sign in</button></a>
+            </div>      
+        </div>
+    </div>
+    <div class="container-narrow" >
+    
+        <div class="page-header">
+            <h1>@title <small>@tagline</small></h1>
+        </div>
+        <div class="row-fluid">
+            <div class="span12">
+                @content
+                <hr>
+                <footer>
+                <p>&copy; 2013 Sébastien Doeraene
+              with help from <a href="http://playframework.com" target="_blank" title="The Definitive Reactive Web Framework"> Play Framework</a>   
+            </p>
+            </footer>
+            </div>        
+        </div>      
+    </div>
+</body>
+</html>

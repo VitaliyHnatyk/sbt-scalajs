@@ -1,0 +1,9 @@
+# Routes
+# This file defines all LoginController routes (Higher priority routes first)
+# ~~~~
+
+GET     /index                          controllers.appshared.MainController.TODO
+
+# Map static resources from the /public folder to the /assets URL path
+GET     /assets/*file               controllers.appshared.Assets.at(path="/public", file)
+GET     /webjars/*file              controllers.appshared.WebJarAssets.at(file)

@@ -10,10 +10,8 @@ Usage
 =====
 
 To use this plugin, add a Resolver to the plugin and use the addSbtPlugin command within your project's `plugins.sbt` file:
-
-    resolvers += "JohnsonUSM snapshots" at "http://johnsonusm.com:8020/nexus/content/repositories/releases/"
-    
-    addSbtPlugin("com.github.inthenow" % "sbt-scalajs" % "0.1.0")
+ 
+    addSbtPlugin("com.github.inthenow" % "sbt-scalajs" % "0.55.X")
 
 Your project's build file also needs to enable sbt-scalajs plugins. For example with build.sbt:
 
@@ -251,9 +249,9 @@ cross-compiled.
 
 Examples
 ========
-
+* See the [Play multi module project](https://github.com/InTheNow/sbt-scalajs/tree/master/example/play-multi-module) in the example directory
 * For a cross-compiling project, see [scalatest-jasmine](https://github.com/InTheNow/scalatest-jasmine)
-* For a multi-ide, multi-module, cross-compiling and cross-testing project, see [the jasmine branch of banana-rdf](https://github.com/InTheNow/banana-rdf/tree/jasmine)
+* For a multi-ide, multi-module, cross-compiling and cross-testing project, see [banana-rdf](https://github.com/w3c/banana-rdf)
 
 Experimental
 ============
