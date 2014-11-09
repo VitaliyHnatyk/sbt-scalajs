@@ -3,6 +3,12 @@ package com.inthenow.sbt.scalajs
 import sbt._
 import sbt.Keys._
 
+object Import {
+  object SbtScalajsKeys {
+
+  }
+}
+
 object SbtScalajs extends AutoPlugin {
 
   override def requires = sbt.plugins.JvmPlugin
