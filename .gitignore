@@ -21,4 +21,4 @@ dist
 .cache
 .worksheet
 .local*
-local*
+*local*
