@@ -23,7 +23,7 @@ libraryDependencies ++= Seq(
   "junit" % "junit" % "4.11" % "test"
 )
 
-addSbtPlugin("org.scala-lang.modules.scalajs" % "scalajs-sbt-plugin" % "0.5.5")
+addSbtPlugin("org.scala-lang.modules.scalajs" % "scalajs-sbt-plugin" % "0.5.6")
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-web" % "1.1.0")
 
