@@ -19,7 +19,7 @@ object JsTarget {
 
 class CommonJsTarget(id: String = "CommonJS") extends JsTarget(id)
 
-class JvmTarget(id: String = "JVM", settings: Seq[Def.Setting[_]] = scalajsJsSettings) extends XTarget(id, settings)
+class JvmTarget(id: String = "JVM", settings: Seq[Def.Setting[_]] = scalajsJvmSettings) extends XTarget(id, settings)
 
 object JvmTarget {
   implicit val jvm: JvmTarget = new JvmTarget()
