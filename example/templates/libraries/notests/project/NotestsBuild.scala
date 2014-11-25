@@ -22,27 +22,11 @@ object NotestsBuild extends Build {
   )
 
   // We want an empty root, i.e. no source in ",", nothing published
-/*
-  lazy val root = Project(
-    id = prj,
-    base = file("."),
-    settings = noRootSettings ++ buildSettings
-  ).dependsOn(prjModules).aggregate(prjModules)
-
-
-  lazy val prjModules = Project(
-    id = s"${prj}_module",
-    base =  modules,
-    settings = buildSettings
-  ).aggregate(sharedjvm, sharedjs, prjJs, prjJvm)
-    .dependsOn(sharedjvm, prjJvm, sharedjs, prjJs)
-
- */
 
  lazy val prjModule = Project(
     id =  prj ,
     base =  modules,
-    settings = buildSettings
+    settings = buildSettings ++ noRootSettings
   ).aggregate(sharedjvm, sharedjs, prjJs, prjJvm)
     .dependsOn(sharedjvm, prjJvm, sharedjs, prjJs)
 

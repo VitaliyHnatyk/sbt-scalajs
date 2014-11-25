@@ -20,7 +20,9 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "junit" % "junit" % "4.11" % "test"
+  "com.chuusai" % "shapeless_2.10.4" % "2.0.0",
+  "junit" % "junit" % "4.11" % "test",
+  "org.scalatest" %% "scalatest" % "2.2.0" % "test"
 )
 
 addSbtPlugin("org.scala-lang.modules.scalajs" % "scalajs-sbt-plugin" % "0.5.6")
