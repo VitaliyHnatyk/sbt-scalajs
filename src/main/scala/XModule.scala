@@ -49,14 +49,14 @@ case class XModule(id: String,
     Project(
       id = getProjectId(id, tp.name),
       base = getProjectBase(id, tp.name),
-      settings = getDefaultSettings ++ tp.defaultSettings
+      settings = getDefaultSettings ++ tp.settings
     ).dependsOn(depends).aggregate(depends)
 
   def xShared(tp: XTarget, hidden:Boolean = false): Project =
     Project(
       id = getSharedProjectId(id, tp.name),
       base = getSharedProjectBase(id, tp.name, hidden) ,
-      settings = getDefaultSettings ++ tp.defaultSettings
+      settings = getDefaultSettings ++ tp.settings
     )
 
 }

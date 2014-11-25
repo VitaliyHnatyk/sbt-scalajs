@@ -4,7 +4,7 @@ import sbt._
 import SbtScalajs._
 
 
-class XTarget(var id: String, var defaultSettings: Seq[Def.Setting[_]] = Seq()) {
+class XTarget(var id: String, var settings: Seq[Def.Setting[_]] = Seq()) {
 
   val name: String = setName(id)
 
@@ -22,5 +22,5 @@ class CommonJsTarget(id: String = "CommonJS") extends JsTarget(id)
 class JvmTarget(id: String = "JVM", settings: Seq[Def.Setting[_]] = scalajsJsSettings) extends XTarget(id, settings)
 
 object JvmTarget {
-  implicit val js: JvmTarget = new JvmTarget()
+  implicit val jvm: JvmTarget = new JvmTarget()
 }
