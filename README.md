@@ -11,7 +11,7 @@ Usage
 
 To use this plugin, add a Resolver to the plugin and use the addSbtPlugin command within your project's `plugins.sbt` file:
  
-    addSbtPlugin("com.github.inthenow" % "sbt-scalajs" % "0.56.5")
+    addSbtPlugin("com.github.inthenow" % "sbt-scalajs" % "0.56.6")
 
 Your project's build file also needs to enable sbt-scalajs plugins. For example with build.sbt:
 

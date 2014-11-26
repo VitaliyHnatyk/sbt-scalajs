@@ -12,6 +12,10 @@ case class XModule(id: String,
 
   lazy val base = file(baseDir)
 
+  def getModuleName() = {
+    s"${id}_module"
+  }
+
   def getProjectBase(projectId: String, projectDir: String, hidden:Boolean = false):File = {
     if (hidden) base / s".$projectDir" else base / projectDir
   }
@@ -42,7 +46,7 @@ case class XModule(id: String,
     Project(
       id = id,
       base = base,
-      settings = SbtScalajs.noRootSettings ++ getDefaultSettings
+      settings = SbtScalajs.noRootSettings ++ getDefaultSettings ++ Seq( name := { getModuleName() } )
     ).dependsOn(jvm, js).aggregate(jvm, js)
 
   def jvmProject(depends: Project) = xProject(depends, jvmTarget)
