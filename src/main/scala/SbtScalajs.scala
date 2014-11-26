@@ -45,10 +45,15 @@ object SbtScalajs extends AutoPlugin {
       Seq(
       )
 
-  val noRootSettings = Seq(
+  val noPublishSettings = Seq(
     publish := {},
-    publishLocal := {}
+    publishLocal := {},
+    packageBin in Compile  := file(""),
+    packageDoc in Compile  := file(""),
+    packageSrc in Compile  := file("")
   )
+
+  val noRootSettings = noPublishSettings
 
   def shareDirectories(that: Project, dir: String) = Seq(
     // pseudo link shared files from jvm source/resource directories to js
