@@ -4,9 +4,11 @@ import sbt._
 import sbt.Keys._
 
 object Import {
+
   object SbtScalajsKeys {
 
   }
+
 }
 
 object SbtScalajs extends AutoPlugin {
@@ -48,9 +50,9 @@ object SbtScalajs extends AutoPlugin {
   val noPublishSettings = Seq(
     publish := {},
     publishLocal := {},
-    packageBin in Compile  := file(""),
-    packageDoc in Compile  := file(""),
-    packageSrc in Compile  := file("")
+    packageBin in Compile := file(""),
+    packageDoc in Compile := file(""),
+    packageSrc in Compile := file("")
   )
 
   val noRootSettings = noPublishSettings
@@ -94,10 +96,39 @@ object SbtScalajs extends AutoPlugin {
     copyResources in Test <<= (copyResources in Test) dependsOn (fastOptJS in Test in prjJs)
   )
 
-  val concatAllSjsDependencies  = Seq(
+  val concatAllSjsDependencies = Seq(
     skip in ScalaJSKeys.packageJSDependencies := false
   )
 
   val scalajsJvmSettings = Seq(target := target.value / "jvm")
   val scalajsJsSettings = Seq(target := target.value / "js")
+
+  // Cross Compiler
+
+  val XScalaMacroDependencies: Seq[Setting[_]] =
+    Seq(libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+      libraryDependencies ++= {
+        CrossVersion.partialVersion(scalaVersion.value) match {
+          // if scala 2.11+ is used, quasiquotes are merged into scala-reflect
+          case Some((2, scalaMajor)) if scalaMajor >= 11 => Seq()
+          // in Scala 2.10, quasiquotes are provided by macro paradise
+          case Some((2, 10)) =>
+            Seq(
+              compilerPlugin("org.scalamacros" % "paradise" % "2.0.0" cross CrossVersion.full),
+              "org.scalamacros" %% "quasiquotes" % "2.0.0" cross CrossVersion.binary
+            )
+        }
+      })
+
+  val XScalaSources: Seq[Setting[_]] = Seq(
+    unmanagedSourceDirectories in Compile <+= (sourceDirectory in Compile, scalaBinaryVersion) {
+      (s, v) => s / ("scala_" + v)
+    },
+    unmanagedSourceDirectories in Test <+= (sourceDirectory in Test, scalaBinaryVersion) {
+      (s, v) => s / ("scala_" + v)
+    }
+  )
+
+  val XScalaSettings: Seq[Setting[_]] = XScalaMacroDependencies ++ XScalaSources
+
 }
