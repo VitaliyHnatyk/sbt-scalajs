@@ -18,12 +18,44 @@ object SbtScalajs extends AutoPlugin {
   import scala.scalajs.sbtplugin.ScalaJSPlugin.ScalaJSKeys._
   import scala.scalajs.sbtplugin.ScalaJSPlugin._
 
+  private val scalaJsManaged =   "scalajs_managed/js"
+
+
+  /**
+   * function to create symbolic links to shared folders
+   * is not used now but will be in the Future
+   * @param link where we will create link
+   * @param dir target folder
+   * @param rewrite if we should rewrite link if it exists
+   * @param log logger to log errors and messages
+   * @return
+   */
+  protected def createSymbolicLink(link:File,dir:File,rewrite:Boolean = false)(implicit log:Logger) =
+    if(link.exists() && !rewrite)
+      log.info(s"detected a link for shared source ${dir.toString}")
+    else
+    {
+      import java.nio.file.Files
+      import java.io._
+      val newLink = link.toPath
+      if(rewrite)Files.deleteIfExists(newLink)
+      val folder = dir.toPath
+      try {
+        Files.createSymbolicLink(newLink, folder)
+        log.info(s"sumbolic link for shared folder ${folder.toString} has been created!")
+      } catch {
+        case x: IOException => log.error(x.toString)
+        case x: UnsupportedOperationException => log.error(x.toString)
+        case other: Throwable => log.error(other.toString)
+      }
+    }
+
   val preScalaJSSettings = {
     Seq(
-      (crossTarget in fastOptJS) in Compile := (crossTarget in Compile).value / "scalajs_managed" / "js",
-      (crossTarget in fastOptJS) in Test := (crossTarget in Test).value / "scalajs_managed" / "js",
-      (crossTarget in packageJSDependencies) in Compile := (crossTarget in Compile).value / "scalajs_managed" / "js",
-      (crossTarget in packageJSDependencies) in Test := (crossTarget in Test).value / "scalajs_managed" / "js"
+      (crossTarget in fastOptJS) in Compile := (crossTarget in Compile).value / scalaJsManaged,
+      (crossTarget in fastOptJS) in Test := (crossTarget in Test).value / scalaJsManaged,
+      (crossTarget in packageJSDependencies) in Compile := (crossTarget in Compile).value / scalaJsManaged,
+      (crossTarget in packageJSDependencies) in Test := (crossTarget in Test).value / scalaJsManaged
     )
   } ++ scalaJSSettings
 
@@ -59,10 +91,10 @@ object SbtScalajs extends AutoPlugin {
 
   def shareDirectories(that: Project, dir: String) = Seq(
     // pseudo link shared files from jvm source/resource directories to js
-    unmanagedSourceDirectories in Compile += (baseDirectory in that).value / "src/main/scala" / dir,
-    unmanagedSourceDirectories in Test += (baseDirectory in that).value / "src/test/scala" / dir,
-    unmanagedResourceDirectories in Compile += (baseDirectory in that).value / "src/main/resources" / dir,
-    unmanagedResourceDirectories in Test += (baseDirectory in that).value / "src/test/resources" / dir
+    unmanagedSourceDirectories in Compile += (scalaSource in (that,Compile)).value /  dir,
+    unmanagedSourceDirectories in Test += (scalaSource in (that,Test)).value  / dir,
+    unmanagedResourceDirectories in Compile += (resourceDirectory in (that,Compile)).value / dir,
+    unmanagedResourceDirectories in Test += (resourceDirectory in (that,Test)).value / dir
 
   )
 
