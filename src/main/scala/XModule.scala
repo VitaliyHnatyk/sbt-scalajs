@@ -63,7 +63,7 @@ case class XModule(id: String,
       id = getProjectId(id, tp.name),
       base = getProjectBase(id, tp.name),
       settings = getDefaultSettings ++ tp.settings ++ Seq( name := { getProjectName(id, tp.name) } )
-    ).dependsOn(depends).aggregate(depends)
+    ).dependsOn(depends % "compile;test->test").aggregate(depends)
 
   def xShared(tp: XTarget, hidden:Boolean = false): Project =
     Project(
