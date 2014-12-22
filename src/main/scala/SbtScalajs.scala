@@ -24,17 +24,18 @@ object SbtScalajs extends AutoPlugin {
   /**
    * function to create symbolic links to shared folders
    * is not used now but will be in the Future
-   * @param link where we will create link
    * @param dir target folder
+   * @param link where we will create link
    * @param rewrite if we should rewrite link if it exists
    * @param log logger to log errors and messages
    * @return
    */
-  protected def createSymbolicLink(link:File,dir:File,rewrite:Boolean = false)(implicit log:Logger) =
+   def createSymbolicLink(dir:File,link:File,rewrite:Boolean = false)(implicit log:Logger) =
     if(link.exists() && !rewrite)
-      log.info(s"detected a link for shared source ${dir.toString}")
+      log.debug(s"detected a link for shared source ${dir.toString}")
     else
     {
+      log.debug(s"not detected a link  ${link.toString} for shared source ${dir.toString}, rewrite = ${rewrite}")
       import java.nio.file.Files
       import java.io._
       val newLink = link.toPath
@@ -42,7 +43,7 @@ object SbtScalajs extends AutoPlugin {
       val folder = dir.toPath
       try {
         Files.createSymbolicLink(newLink, folder)
-        log.info(s"sumbolic link for shared folder ${folder.toString} has been created!")
+        log.info(s"symbolic link for shared folder ${folder.toString} has been created!")
       } catch {
         case x: IOException => log.error(x.toString)
         case x: UnsupportedOperationException => log.error(x.toString)
@@ -104,8 +105,12 @@ object SbtScalajs extends AutoPlugin {
     unmanagedSourceDirectories in Test += base / "src/test/scala" / dir,
     unmanagedResourceDirectories in Compile += base / "src/main/resources" / dir,
     unmanagedResourceDirectories in Test += base / "src/test/resources" / dir
-
   )
+
+  def addRelDirectories(projBase: File, relPath: String, dir: String = ".") = {
+    val fullPath =  projBase.getCanonicalFile / relPath
+    addDirectories(fullPath, dir)
+  }
 
   def linkedSources(sharedSrc: Project) = Seq(
     // pseudo link shared files from jvm source/resource directories to js
@@ -114,6 +119,14 @@ object SbtScalajs extends AutoPlugin {
     unmanagedResourceDirectories in Compile ++= (unmanagedResourceDirectories in(sharedSrc, Compile)).value,
     unmanagedResourceDirectories in Test ++= (unmanagedResourceDirectories in(sharedSrc, Test)).value
   )
+
+  def linkToShared(base:File, pathToShared:String)(implicit log:Logger) = {
+    val sharedDir = base.getCanonicalFile / pathToShared
+    val sharedSrc = sharedDir / "src/main/scala"
+    val sharedTest = sharedDir / "src/main/test"
+    if (sharedSrc.exists()) SbtScalajs.createSymbolicLink(sharedSrc,base.getCanonicalFile / "src/main/scala/shared")(log) else log.debug(s"$sharedSrc does not exist")
+    if (sharedTest.exists()) SbtScalajs.createSymbolicLink(sharedTest,base.getCanonicalFile / "src/test/scala/shared")(log) else log.debug(s"$sharedTest does not exist")
+  }
 
   def sjsResources(prjJs: Project) = Seq(
     unmanagedResourceDirectories in Compile += (crossTarget in fastOptJS in Compile in prjJs).value,
