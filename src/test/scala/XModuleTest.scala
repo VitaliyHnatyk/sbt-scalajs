@@ -7,6 +7,8 @@ import sbt._
 import scala.scalajs.sbtplugin.ScalaJSPlugin._
 
 class XModuleTest extends FunSpec with Matchers {
+  implicit val logger:Logger = ConsoleLogger()
+
   val scalaz_js = Seq(libraryDependencies += "com.github.japgolly.fork.scalaz" %%% "scalaz-core" % "7.0.6")
 
   describe("An XModule") {
@@ -22,6 +24,7 @@ class XModuleTest extends FunSpec with Matchers {
 
   }
   describe("A root XModule project") {
+    import SharedProject._
     lazy val RDF = XModule(id = "rdf")
     lazy val rdf = RDF.project(rdf_jvm, rdf_js)
 
@@ -65,6 +68,7 @@ class XModuleTest extends FunSpec with Matchers {
   }
 
   describe("A non-root XModule project") {
+    import SharedProject._
     lazy val RDF = XModule(id = "rdf", baseDir = "rdf", sharedLabel = "common")
     lazy val rdf = RDF.project(rdf_jvm, rdf_js)
 
@@ -108,6 +112,7 @@ class XModuleTest extends FunSpec with Matchers {
   }
 
   describe("A non-root XModule project with custom target") {
+    import SharedProject._
 
     implicit val js:JsTarget = new CommonJsTarget()
     implicit val jvm:JvmTarget = new JvmTarget("ibmJVM")
@@ -152,5 +157,12 @@ class XModuleTest extends FunSpec with Matchers {
 
     }
   }
+  describe("A real shared module") {
+    import LinkedProject._
+    val module = XModule(id = "notests", modulePrefix = "banana-")
 
+    lazy val rdf       = module.project(prjJvm, prjJs)
+    lazy val prjJvm    = module.jvmProject()
+    lazy val prjJs     = module.jsProject()
+  }
 }
