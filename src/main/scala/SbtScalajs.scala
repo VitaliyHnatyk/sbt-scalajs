@@ -147,7 +147,7 @@ object SbtScalajs extends AutoPlugin {
 
   val scalajsJvmSettings = Seq(target := target.value / "jvm")
   val scalajsJsSettings = Seq(target := target.value / "js")
-
+  val scalajsCommonJsSettings = Seq(target := target.value / "commonjs")
   // Cross Compiler
 
   val XScalaMacroDependencies: Seq[Setting[_]] =

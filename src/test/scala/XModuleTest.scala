@@ -9,13 +9,16 @@ import scala.scalajs.sbtplugin.ScalaJSPlugin._
 class XModuleTest extends FunSpec with Matchers {
   implicit val logger:Logger = ConsoleLogger()
 
+ // implicit val module  = new ModuleSig[SharedProject.type] {  type Project = SharedProject.SharedProjectOps[Targets]
+
+  //  type Targets = XTargets}
   val scalaz_js = Seq(libraryDependencies += "com.github.japgolly.fork.scalaz" %%% "scalaz-core" % "7.0.6")
 
   describe("An XModule") {
-
+      val sig = new XSharedBuild
     it("Should create a new module with just an Id") {
 
-      lazy val RDF = XModule(id = "rdf")
+      lazy val RDF = XModule[sig.Targets, sig.BuildOps](id = "rdf")
 
       RDF.id shouldBe "rdf"
       RDF.base.getName  shouldBe "."
@@ -24,8 +27,8 @@ class XModuleTest extends FunSpec with Matchers {
 
   }
   describe("A root XModule project") {
-    import SharedProject._
-    lazy val RDF = XModule(id = "rdf")
+    //import SharedProject._
+    lazy val RDF = XModule[ XSharedBuild#Targets, XSharedBuild#BuildOps](id = "rdf")
     lazy val rdf = RDF.project(rdf_jvm, rdf_js)
 
     lazy val rdf_jvm = RDF.jvmProject(rdf_common_jvm)
@@ -68,8 +71,8 @@ class XModuleTest extends FunSpec with Matchers {
   }
 
   describe("A non-root XModule project") {
-    import SharedProject._
-    lazy val RDF = XModule(id = "rdf", baseDir = "rdf", sharedLabel = "common")
+   // import SharedProject._
+    lazy val RDF = XModule[XSharedBuild#Targets, XSharedBuild#BuildOps](id = "rdf", baseDir = "rdf", sharedLabel = "common")
     lazy val rdf = RDF.project(rdf_jvm, rdf_js)
 
     lazy val rdf_jvm = RDF.jvmProject(rdf_common_jvm)
@@ -112,11 +115,24 @@ class XModuleTest extends FunSpec with Matchers {
   }
 
   describe("A non-root XModule project with custom target") {
-    import SharedProject._
 
-    implicit val js:JsTarget = new CommonJsTarget()
-    implicit val jvm:JvmTarget = new JvmTarget("ibmJVM")
-    lazy val RDF = XModule(id = "rdf", baseDir = "rdf", sharedLabel = "common")
+    class MyXTargets  extends XTargetsSig {
+      implicit val js: JsTarget = new CommonJsTarget()
+      implicit val jvm: JvmTarget = new JvmTarget("ibmJVM")
+    }
+    object MyXTargets {
+      implicit def apply = new MyXTargets
+    }
+    trait MyX extends BuildSig {
+
+      type Project = XSharedBuild.XSharedBuildOps[Targets]
+
+      type Targets = MyXTargets
+
+    }
+
+
+    lazy val RDF = XModule[MyX#Targets, MyX#Project](id = "rdf", baseDir = "rdf", sharedLabel = "common")
     lazy val rdf = RDF.project(rdf_jvm, rdf_js)
 
     lazy val rdf_jvm = RDF.jvmProject(rdf_common_jvm)
@@ -158,11 +174,69 @@ class XModuleTest extends FunSpec with Matchers {
     }
   }
   describe("A real shared module") {
-    import LinkedProject._
-    val module = XModule(id = "notests", modulePrefix = "banana-")
+    //import LinkedProject._
+
+    type X = XLinkedBuild
+    val module = XModule[X#Targets, X#BuildOps](id = "notests", modulePrefix = "banana-")
 
     lazy val rdf       = module.project(prjJvm, prjJs)
-    lazy val prjJvm    = module.jvmProject()
-    lazy val prjJs     = module.jsProject()
+    lazy val prjJvm    = module.jvmProject(sharedjvm)
+    lazy val prjJs     = module.jsProject(sharedjs)
+    lazy val sharedjvm = module.jvmShared()
+    lazy val sharedjs  = module.jsShared(sharedjvm)
+  }
+  describe("A single JVM module") {
+
+    type X = SBuildJvm
+    val module = SModule[X#Targets, X#BuildOps](id = "notests", modulePrefix = "banana-")
+
+    lazy val rdf = module.jvmProject[X#Targets]
+  }
+
+
+
+  describe("A single JS module") {
+
+    type X = SBuildJs
+    val module = SModule[X#Targets, X#BuildOps](id = "notests", modulePrefix = "banana-")
+
+    lazy val rdf = module.jsProject[X#Targets]
+  }
+  describe("A single CommonJS module") {
+
+    type X = SBuildCommonJs
+    val module = SModule[X#Targets, X#BuildOps](id = "notests", modulePrefix = "banana-")
+
+    lazy val rdf:Project = module.jsProject[X#Targets]
+
+  }
+  describe("A root module") {
+
+    lazy val rootModule = XRootModule(moduleName ="MyModule")
+    lazy val root       = rootModule.project(rootJvm, rootJs)
+    lazy val rootJvm    = rootModule.jvmProject(prjJvm, prjJvm2, jena)
+    lazy val rootJs     = rootModule.jsProject(prjJs, prjJs2)
+
+    type X = XLinkedBuild
+    lazy val module = XModule[X#Targets, X#BuildOps](id = "notests", modulePrefix = "banana-")
+
+    lazy val rdf       = module.project(prjJvm, prjJs)
+    lazy val prjJvm    = module.jvmProject(sharedjvm)
+    lazy val prjJs     = module.jsProject(sharedjs)
+    lazy val sharedjvm = module.jvmShared()
+    lazy val sharedjs  = module.jsShared(sharedjvm)
+
+    lazy val module2 = XModule[X#Targets, X#BuildOps](id = "notests", modulePrefix = "banana-")
+
+    lazy val rdf2       = module.project(prjJvm2, prjJs2)
+    lazy val prjJvm2    = module.jvmProject(sharedjvm2)
+    lazy val prjJs2     = module.jsProject(sharedjs2)
+    lazy val sharedjvm2 = module.jvmShared()
+    lazy val sharedjs2  = module.jsShared(sharedjvm2)
+
+    type XJ = SBuildJvm
+    lazy val jenaModule = SModule[XJ#Targets, XJ#BuildOps](id = "notests", modulePrefix = "banana-")
+
+    lazy val jena = jenaModule.jvmProject[XJ#Targets]
   }
 }
