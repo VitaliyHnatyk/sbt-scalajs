@@ -1,6 +1,8 @@
 sbt-scalajs
 =======
 
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/InTheNow/sbt-scalajs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 An SBT plugin for [Scala,js](http://www.scala-js.org/).
 
 This plugin wraps the plugin supplied with scalajs as an auto-plugin and adds some pre-defined settings for cross-compiling 
