@@ -4,7 +4,7 @@ import sbt._
 import sbt.Keys._
 import SbtScalajs._
 
-case class XRootModule(id: String = "root",
+case class CrossRootModule(id: String = "root",
                        baseDir: String = ".",
                        moduleName: String,
                        sharedLabel: String = "",

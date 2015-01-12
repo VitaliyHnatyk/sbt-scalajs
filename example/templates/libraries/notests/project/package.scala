@@ -3,25 +3,11 @@ package notests
 import com.inthenow.sbt.scalajs._
 
 /**
- * Define different ways to build the project
+ * Override different ways to build the project
  */
 package  object build {
 
-    trait Shared {
-        type rdf = XSharedBuild
-        type db = XSharedBuild
-        type jena = SBuildJvm
-    }
+    val t = SharedBuild //  CommonBaseBuild SharedBuild SymLinkedBuild
 
-    trait Common {
-        type rdf = XCommonBaseBuild
-        type db = XCommonBaseBuild
-        type jena = SBuildJvm
-    }
-
-    trait SymLinked {
-        type rdf = XLinkedBuild
-        type db  = XLinkedBuild
-        type jena = SBuildJvm
-    }
+    Seq("rdf", "db").map{m =>  CrossBuildOps.setBuildType(m, t)}
 }
