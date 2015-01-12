@@ -6,6 +6,7 @@ import com.inthenow.sbt.scalajs._
 import scala.scalajs.sbtplugin.ScalaJSPlugin._
 
 object NotestsBuild extends Build {
+  import Dependencies._
 
   implicit val logger: Logger = ConsoleLogger()
 
@@ -55,8 +56,8 @@ object NotestsBuild extends Build {
   lazy val db          = dbModule.project(dbJvm, dbJs)
   lazy val dbJvm       = dbModule.jvmProject(dbSharedJvm)
   lazy val dbJs        = dbModule.jsProject(dbSharedJs)
-  lazy val dbSharedJvm = dbModule.jvmShared().settings(libraryDependencies +=  "org.scalaz" %% "scalaz-core" % "7.0.6")
-  lazy val dbSharedJs  = dbModule.jsShared(dbSharedJvm).settings(Seq(libraryDependencies += "com.github.japgolly.fork.scalaz" %%% "scalaz-core" % "7.0.6"):_*)//.asInstanceOf[Project]
+  lazy val dbSharedJvm = dbModule.jvmShared().settings(libraryDependencies +=  scalaz)
+  lazy val dbSharedJs  = dbModule.jsShared(dbSharedJvm).settings(sclalajsQuery ++ scalaz_js:_*)
 
   /**
    * The Jena module, just a plain old JS/JVM  project

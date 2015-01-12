@@ -1,3 +1,5 @@
+package notests.build
+
 import sbt.Keys._
 import sbt._
 
