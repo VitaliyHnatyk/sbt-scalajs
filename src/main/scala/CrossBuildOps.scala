@@ -22,25 +22,30 @@ sealed trait CrossBuildOps {
 }
 
 object CrossBuildOps {
-  def setBuildType(module: String, build: CrossBuildType): String = {
+
+  def getKey(module: CrossModule) = s"${module.modulePrefix}${module.id}.build"
+
+  def setBuildType(module: CrossModule, build: CrossBuildType): String = {
+    val key = getKey(module)
     val result = build match {
       case SharedBuild     => "SharedBuild"
       case SymLinkedBuild  => "SymLinkedBuild"
       case CommonBaseBuild => "CommonBaseBuild"
-      case _ => throw new Error(s"Unknown build type ${build.toString} for ${module}.build")
+      case _ => throw new Error(s"Unknown build type ${build.toString} for $key")
     }
-    System.setProperty(s"${module}.build", result)
+    System.setProperty(key, result)
     result
   }
 
-  def getBuildType(module: String, default: CrossBuildType): CrossBuildType = {
-    val result = Option(System.getProperty(s"${module}.build")) match {
+  def getBuildType(module: CrossModule): CrossBuildType = { //, default: CrossBuildType): CrossBuildType = {
+    val key = getKey(module)
+    val result = Option(System.getProperty(key)) match {
       case Some("SharedBuild")     => SharedBuild
       case Some("SymLinkedBuild")  => SymLinkedBuild
       case Some("CommonBaseBuild") => CommonBaseBuild
-      case None => default
-      case opt: Option[String] => throw new Error(s"Unknown build type $opt for ${module}.build")
-      case _ => default
+      case None => module.build
+      case opt: Option[String] => throw new Error(s"Unknown build type $opt for $key")
+      case _ => module.build
     }
     result
   }
@@ -56,10 +61,12 @@ case class SymLinkedBuild (m: CrossModule  ) extends CrossBuildOps {
     Project(
       id = getSharedProjectId(m.id, tp.name),
       base = getSharedProjectBase(m.id, tp.name, hidden),
-      settings = SbtScalajs.noRootSettings ++ m.getDefaultSettings ++ tp.settings ++ Seq(name := {
-        getSharedProjectName(m.id, tp.name)
-      }
-      ))
+      settings = SbtScalajs.noRootSettings ++ m.getDefaultSettings
+      //  ++ tp.settings ++ Seq(name := {
+      //  getSharedProjectName(m.id, tp.name)
+     // }
+     // )
+    )
 
   def jvmShared():  Project = xShared(m.targets.jvm)
 
@@ -82,7 +89,7 @@ case class SymLinkedBuild (m: CrossModule  ) extends CrossBuildOps {
 
   private def xProject(p: Project, tp: Target): Project = {
     // if we can find a shared directory, link to it
-    SbtScalajs.linkToShared(m.getProjectBase(m.id, tp.name), s"../${m.sharedLabel}")(m.log)
+    val links = SbtScalajs.linkToShared(m.getProjectBase(m.id, tp.name), s"../${m.sharedLabel}")(m.log)
     val setings:Seq[sbt.Def.Setting[_]] = p.settings
     val aggregates:Seq[sbt.ProjectReference] = p.aggregate
 
@@ -90,7 +97,8 @@ case class SymLinkedBuild (m: CrossModule  ) extends CrossBuildOps {
     Project(
       id = m.getProjectId(m.id, tp.name),
       base = m.getProjectBase(m.id, tp.name),
-      settings = m.getDefaultSettings ++ tp.settings ++ Seq(name := {
+      settings = m.getDefaultSettings ++ tp.settings ++ links ++ Seq(
+        name := {
         m.getProjectName(m.id, tp.name)
       })
     ).settings(setings:_*)
@@ -168,6 +176,6 @@ abstract class SharedBuildOpsBase[B <: CrossBuildOps](m: CrossModule ) extends C
       settings = m.getDefaultSettings ++ tp.settings ++ Seq(name := {
         m.getProjectName(m.id, tp.name)
       })
-    ).dependsOn(depends % "compile;test->test").aggregate(aggregates: _*)
+    ).dependsOn(depends % "compile;test->test").aggregate(depends)
   }
 }

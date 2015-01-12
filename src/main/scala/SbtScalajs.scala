@@ -124,8 +124,17 @@ object SbtScalajs extends AutoPlugin {
     val sharedDir = base.getCanonicalFile / pathToShared
     val sharedSrc = sharedDir / "src/main/scala"
     val sharedTest = sharedDir / "src/main/test"
-    if (sharedSrc.exists()) SbtScalajs.createSymbolicLink(sharedSrc,base.getCanonicalFile / "src/main/scala/shared")(log) else log.debug(s"$sharedSrc does not exist")
-    if (sharedTest.exists()) SbtScalajs.createSymbolicLink(sharedTest,base.getCanonicalFile / "src/test/scala/shared")(log) else log.debug(s"$sharedTest does not exist")
+
+    val linkMain:File = base.getCanonicalFile / "src/main/scala/shared"
+    val linkTest:File = base.getCanonicalFile / "src/test/scala/shared"
+
+    if (sharedSrc.exists()) SbtScalajs.createSymbolicLink(sharedSrc, linkMain)(log)
+    else log.debug(s"$sharedSrc does not exist")
+
+    if (sharedTest.exists()) SbtScalajs.createSymbolicLink(sharedTest, linkTest)(log)
+    else log.debug(s"$sharedTest does not exist")
+
+    Seq(cleanFiles += linkMain, cleanFiles += linkTest)
   }
 
   def sjsResources(prjJs: Project) = Seq(

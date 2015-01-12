@@ -21,7 +21,7 @@ case class CrossModule(id: String,
   val js = targets.js
   val commonJs = targets.commonJs
 
-  val ops = getBuildType(id, build).ops(this)
+  val ops = getBuildType(this).ops(this)
 
   def jvmProject(p: Project): Project = ops.jvmProject(p)
 
