@@ -1,17 +1,15 @@
-package notests.build
-
 import sbt._
 import sbt.Keys._
 import com.inthenow.sbt.scalajs._
 import scala.scalajs.sbtplugin.ScalaJSPlugin._
 
-object NotestsBuild extends Build {
+object CrossversionBuild extends Build {
   import Dependencies._
 
   implicit val logger: Logger = ConsoleLogger()
 
   lazy val buildSettings: Seq[Setting[_]] = Seq(
-    organization := "com.github.notests",
+    organization := "com.github.CrossVersion",
     scalaVersion := "2.11.4",
     crossScalaVersions := Seq("2.11.4", "2.10.4"),
     scalacOptions ++= Seq("-deprecation", "-unchecked")
@@ -20,7 +18,7 @@ object NotestsBuild extends Build {
   /**
    * The root, aggregate project
    */
-  lazy val rootModule = CrossRootModule(moduleName = "notests", defaultSettings = buildSettings)
+  lazy val rootModule = CrossRootModule(moduleName = "CrossVersion", defaultSettings = buildSettings )
   lazy val root       = rootModule.project(rootJvm, rootJs)
   lazy val rootJvm    = rootModule.jvmProject(rdfJvm, dbJvm, jena)
   lazy val rootJs     = rootModule.jsProject(rdfJs, dbJs)
@@ -31,9 +29,9 @@ object NotestsBuild extends Build {
   lazy val rdfModule = CrossModule(
     id              = "rdf",
     baseDir         = "rdf",
-    build           = SharedBuild,
+    build           = SymLinkedBuild,
     defaultSettings = buildSettings,
-    modulePrefix    = "notests-"
+    modulePrefix    = "crossversion-"
   )
 
   lazy val rdf          = rdfModule.project(rdfJvm, rdfJs)
@@ -47,10 +45,10 @@ object NotestsBuild extends Build {
    */
   lazy val dbModule = CrossModule(
     id              = "db",
-    baseDir         = "notestsDB",
-    build           = SharedBuild,
-    defaultSettings = buildSettings,
-    modulePrefix    = "notests-")
+    baseDir         = "db",
+    build           = SymLinkedBuild,
+    defaultSettings = buildSettings ++ SbtScalajs.XScalaSettings,
+    modulePrefix    = "crossversion-")
 
   lazy val db          = dbModule.project(dbJvm, dbJs)
   lazy val dbJvm       = dbModule.jvmProject(dbSharedJvm)
@@ -67,7 +65,7 @@ object NotestsBuild extends Build {
     build           = SingleBuild,
     target          = JvmTarget,
     defaultSettings = buildSettings,
-    modulePrefix    = "notests-"
+    modulePrefix    = "crossversion-"
   )
 
   lazy val jena = jenaModule.jsProject

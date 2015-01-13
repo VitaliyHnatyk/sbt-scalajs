@@ -20,3 +20,4 @@ case class Module(id: String,
 
   def jsProject(): Project = ops.jsProject()
 }
+

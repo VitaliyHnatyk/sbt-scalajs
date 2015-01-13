@@ -12,8 +12,7 @@ case class CrossModule(id: String,
                    modulePrefix: String = "",
                    sharedLabel: String = "shared",
                    defaultSettings: Seq[Def.Setting[_]] = Seq())
-                  ( implicit val log: Logger)
-  extends DefaultModuleOps {
+                  ( implicit val log: Logger)  extends DefaultModuleOps {
 
   import CrossBuildOps._
   val targets = target.targets
