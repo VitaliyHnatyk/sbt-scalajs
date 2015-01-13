@@ -122,38 +122,17 @@ object SbtScalajs extends AutoPlugin {
     unmanagedResourceDirectories in Test ++= (unmanagedResourceDirectories in(sharedSrc, Test)).value
   )
 
-  def linkToSharedDir(base: File, pathToShared: String, dirName: String, newDirName: String)(implicit log: Logger): Seq[Def.Setting[Seq[File]]] = {
-    val sharedDir = base.getCanonicalFile / pathToShared
-    val sharedSrc = sharedDir / s"src/main/$dirName"
-    val sharedTest = sharedDir / s"src/test/$dirName"
-
-    val linkMain: File = base.getCanonicalFile / s"src/main/$newDirName"
-    val linkTest: File = base.getCanonicalFile / s"src/test/$newDirName"
-
-    if (sharedSrc.exists()) SbtScalajs.createSymbolicLink(sharedSrc, linkMain)(log)
-    else log.debug(s"$sharedSrc does not exist")
-
-    if (sharedTest.exists()) SbtScalajs.createSymbolicLink(sharedTest, linkTest)(log)
-    else log.debug(s"$sharedTest does not exist")
-
-    Seq(cleanFiles += linkMain, cleanFiles += linkTest)
-  }
 
   def linkToShared(base: File, pathToShared: String, label: String)(implicit log: Logger): Seq[FileSettings] = {
-
-
 
     def getSub(dir: File, prefix:String): List[File] = {
       if (dir.exists()) dir.listFiles.filter(_.isDirectory).filter(_.getName.startsWith(prefix)).toList
       else Nil
     }
 
-
     val dir =base.getCanonicalFile / pathToShared
-    val dirs: List[File] =getSub(dir / "src/main", "scala") ++ getSub(dir / "src/test", "scala")
+    val dirs: List[File] = getSub(dir / "src/main", "scala") ++ getSub(dir / "src/test", "scala")
 
-    //val dd = dirs.mkString("\n")
-   // log.info(s"found directories $dd")
     dirs.foldLeft(Seq[FileSettings]()) { (l, d) =>
       val dirName = d.getName
       val path = d.getParentFile
@@ -183,8 +162,7 @@ object SbtScalajs extends AutoPlugin {
   )
 
 
-  // Cross Compiler
-
+  // Cross version support
   val XScalaMacroDependencies: Seq[Setting[_]] =
     Seq(libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value,
       libraryDependencies ++= {
@@ -212,88 +190,8 @@ object SbtScalajs extends AutoPlugin {
   val XScalaSettings: Seq[Setting[_]] = XScalaMacroDependencies ++ XScalaSources
 
 
-
   val scalajsJvmSettings = Seq(target := baseDirectory.value / "target" / "jvm") ++ XScalaSources
   val scalajsJsSettings = Seq(target :=  baseDirectory.value / "target" / "js") ++ XScalaSources
   val scalajsCommonJsSettings = Seq(target :=  baseDirectory.value / "target" / "commonjs") ++ XScalaSources
 }
 
-
-
-/*
-
- val XScalaJvmSources: Seq[Setting[_]] = Seq(
-    unmanagedSourceDirectories in Compile <++= (sourceDirectory in Compile, scalaBinaryVersion) {
-      (s, v) => Seq( s / ("scala_jvm_" + v), s / "scala_jvm")
-    },
-    unmanagedSourceDirectories in Test <++= (sourceDirectory in Test, scalaBinaryVersion) {
-      (s, v) => Seq( s / ("scala_jvm_" + v), s / "scala_jvm")
-    }
-  )
-
-  val XScalaJsSources: Seq[Setting[_]] = Seq(
-    unmanagedSourceDirectories in Compile <++= (sourceDirectory in Compile, scalaBinaryVersion) {
-      (s, v) => Seq( s / ("scala_js_" + v), s / "scala_js")
-    },
-    unmanagedSourceDirectories in Test <++= (sourceDirectory in Test, scalaBinaryVersion) {
-      (s, v) => Seq( s / ("scala_js_" + v), s / "scala_js")
-    }
-  )
-
-
-def linkToSharedDir(base: File, pathToShared: String, dirName: String, newDirName: String)(implicit log: Logger): Seq[Def.Setting[Seq[File]]] = {
-    val sharedDir = base.getCanonicalFile / pathToShared
-    val sharedSrc = sharedDir / s"src/main/$dirName"
-    val sharedTest = sharedDir / s"src/test/$dirName"
-
-    val linkMain: File = base.getCanonicalFile / s"src/main/$newDirName"
-    val linkTest: File = base.getCanonicalFile / s"src/test/$newDirName"
-
-    if (sharedSrc.exists()) SbtScalajs.createSymbolicLink(sharedSrc, linkMain)(log)
-    else log.debug(s"$sharedSrc does not exist")
-
-    if (sharedTest.exists()) SbtScalajs.createSymbolicLink(sharedTest, linkTest)(log)
-    else log.debug(s"$sharedTest does not exist")
-
-    Seq(cleanFiles += linkMain, cleanFiles += linkTest)
-  }
-
-
-
-def linkToShared(base: File, pathToShared: String, label: String)(implicit log: Logger): Seq[FileSettings] = {
-
-    def getAllSubDirectories(dir: File, prefix:String): List[File] = {
-      def loop(toCheck: List[File], results: List[File]): Seq[File] = toCheck match {
-        case head :: tail =>
-         // log.info(s"Looking in  ${head}")
-          val these = head.listFiles
-          val directories = these.filter(_.isDirectory).toList
-         // log.info(s"  Found " + directories.mkString(", "))
-      //val updated = if (directories.size) results else   results ++ directories    //head :: results
-          loop(tail ++ directories, results ++ directories)
-        case _ => results
-      }
-
-      val l= loop( List(dir), Nil)
-     // println(l.mkString("\n"))
-     // println(l.map(_.getName).mkString("\n"))
-        //l.map(_.getName).filter(_.startsWith(prefix)).toList
-      l.filter(_.getName.startsWith(prefix)).toList
-    }
-
-
-    val dirs: List[File] = getAllSubDirectories(base.getCanonicalFile / pathToShared, "scala")
-    //val dd = dirs.mkString("\n")
-   // log.info(s"found directories $dd")
-    dirs.foldLeft(Seq[FileSettings]()) { (l, d) =>
-      val dirName = d.getName
-      val path = d.getParentFile
-      val newDirName = if (dirName.startsWith("scala_")) dirName.replace("scala_", s"scala_$label") else s"scala/$label"
-
-      l ++ linkToSharedDir(base, pathToShared, d, newDirName)
-    }
-
-  }
-
-
- */
