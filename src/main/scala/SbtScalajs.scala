@@ -114,7 +114,7 @@ object SbtScalajs extends AutoPlugin {
     addDirectories(fullPath, dir)
   }
 
-  def linkedSources(sharedSrc: Project) = Seq(
+  def linkedSources(sharedSrc: Project): Seq[FileSettings] = Seq(
     // pseudo link shared files from jvm source/resource directories to js
     unmanagedSourceDirectories in Compile ++= (unmanagedSourceDirectories in(sharedSrc, Compile)).value,
     unmanagedSourceDirectories in Test ++= (unmanagedSourceDirectories in(sharedSrc, Test)).value,
@@ -123,25 +123,57 @@ object SbtScalajs extends AutoPlugin {
   )
 
 
+  /**
+   * Given a base directory, such as the base directory of a project, and a path to a shared directory, creates
+   * source links from the shared directory to the project.
+   *
+   * Example (where ... is the base of the module):
+   * Given a project structure
+   *
+   * {{{.../shared/src/main/scala
+   * .../shared/src/main/scala_2.10
+   * .../shared/src/main/scala_2.11
+   * .../shared/src/test/scala
+   *
+   * .../js/src/main/scala
+   * .../js/src/main/scala_2.10
+   * .../js/src/main/scala_2.11}}}
+   *
+   * Executing
+   * {{{linkToShared(".../js", "../shared", "shared")}}}
+   * yields the symlinks:
+   *
+   * {{{.../js/src/main/scala_shared
+   * .../js/src/main/scala_shared_2.10
+   * .../js/src/main/scala_shared_2.11
+   * .../js/src/test/scala_shared}}}
+   *
+   * @param base target folder where link will be creates
+   * @param pathToShared path to the shared folder
+   * @param label the name of the shared directory, e.g. "shared", "common", etc.
+   * @param log logger to log errors and messages
+   * @return a sequence of cleanfile settings so that the build can remove the links via a clean command
+   */
   def linkToShared(base: File, pathToShared: String, label: String)(implicit log: Logger): Seq[FileSettings] = {
 
+    // returns list of subdirectories of dir that start with "prefix". Files have full path
     def getSub(dir: File, prefix:String): List[File] = {
       if (dir.exists()) dir.listFiles.filter(_.isDirectory).filter(_.getName.startsWith(prefix)).toList
       else Nil
     }
 
-    val dir =base.getCanonicalFile / pathToShared
+    val baseCanonicalFile = base.getCanonicalFile
+    val dir = baseCanonicalFile / pathToShared
     val dirs: List[File] = getSub(dir / "src/main", "scala") ++ getSub(dir / "src/test", "scala")
 
     dirs.foldLeft(Seq[FileSettings]()) { (l, d) =>
-      val dirName = d.getName
-      val path = d.getParentFile
-      val newDirName = if (dirName.startsWith("scala_")) dirName.replace("scala_", s"scala_${label}_") else s"scala/$label"
-      val link = path / newDirName
-      createSymbolicLink(d, link)
+      val linkPath = d.getParent.replace(dir.getPath,baseCanonicalFile.getPath )
+      val linkName = d.getName.replace("scala", s"scala_${label}")
+      val link     = file(s"$linkPath/$linkName")
+
+      createSymbolicLink( d, link)
       l ++  Seq(cleanFiles += link)
     }
-
   }
 
   def sjsResources(prjJs: Project) = Seq(
@@ -178,20 +210,21 @@ object SbtScalajs extends AutoPlugin {
         }
       })
 
-  val XScalaSources: Seq[Setting[_]] = Seq(
-    unmanagedSourceDirectories in Compile <++= (sourceDirectory in Compile, scalaBinaryVersion) {
-      (s, v) => Seq(s / ("scala_" + v),  s / ("scala_shared_" + v))
-    },
-    unmanagedSourceDirectories in Test <++= (sourceDirectory in Test, scalaBinaryVersion) {
-      (s, v) => Seq(s / ("scala_" + v),  s / ("scala_shared_" + v))
+  def CrossVersionSources(label:String) : Seq[Setting[_]] =
+    Seq(Compile, Test).map { sc =>
+      unmanagedSourceDirectories in sc <++= (sourceDirectory in sc, scalaBinaryVersion) {
+        (s, v) => Seq(s / ("scala_" + v) )
+      }
     }
-  )
 
-  val XScalaSettings: Seq[Setting[_]] = XScalaMacroDependencies ++ XScalaSources
+  def scalajsTargetSettings(name:String): Seq[Setting[_]] = {
+    Seq(target := baseDirectory.value / "target" / name)
+  }
 
-
-  val scalajsJvmSettings = Seq(target := baseDirectory.value / "target" / "jvm") ++ XScalaSources
-  val scalajsJsSettings = Seq(target :=  baseDirectory.value / "target" / "js") ++ XScalaSources
-  val scalajsCommonJsSettings = Seq(target :=  baseDirectory.value / "target" / "commonjs") ++ XScalaSources
+  def CrossVersionSharedSources(label:String) : Seq[Setting[_]] =
+    Seq(Compile, Test).map { sc =>
+      unmanagedSourceDirectories in sc <++= (sourceDirectory in sc, scalaBinaryVersion) {
+        (s, v) => Seq(s / ("scala_" + v),  s / (s"scala_${label}_" + v),  s / s"scala_${label}")
+      }
+    }
 }
-

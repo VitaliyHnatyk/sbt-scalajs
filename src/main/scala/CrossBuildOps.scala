@@ -2,6 +2,7 @@ package com.inthenow.sbt.scalajs
 
 import sbt._
 import sbt.Keys._
+import SbtScalajs._
 
 sealed trait CrossBuildOps {
 
@@ -30,6 +31,7 @@ object CrossBuildOps {
     val result = build match {
       case SharedBuild     => "SharedBuild"
       case SymLinkedBuild  => "SymLinkedBuild"
+      case SbtLinkedBuild  => "SbtLinkedBuild"
       case CommonBaseBuild => "CommonBaseBuild"
       case _ => throw new Error(s"Unknown build type ${build.toString} for $key")
     }
@@ -42,6 +44,7 @@ object CrossBuildOps {
     val result = Option(System.getProperty(key)) match {
       case Some("SharedBuild")     => SharedBuild
       case Some("SymLinkedBuild")  => SymLinkedBuild
+      case Some("SbtLinkedBuild")  => SbtLinkedBuild
       case Some("CommonBaseBuild") => CommonBaseBuild
       case None => module.build
       case opt: Option[String] => throw new Error(s"Unknown build type $opt for $key")
@@ -49,23 +52,45 @@ object CrossBuildOps {
     }
     result
   }
+
 }
 
 sealed trait CrossBuildType {
   def ops(m: CrossModule):CrossBuildOps
 }
 
-case class SymLinkedBuild (m: CrossModule  ) extends CrossBuildOps {
+case object SymLinkedBuild extends CrossBuildType {
+  def ops(m: CrossModule) = new SymLinkedBuild (m)
+}
+
+case class SymLinkedBuild (m: CrossModule  ) extends LinkedBuild(m) {
+  protected def xProject(p: Project, tp: Target): Project = {
+    val links = linkToShared(m.getProjectBase(m.id, tp.name), s"../${m.sharedLabel}",m.sharedLabel )(m.log)
+    xProject(p, tp, links)
+  }
+}
+
+case object SbtLinkedBuild extends CrossBuildType {
+  def ops(m: CrossModule) = new SbtLinkedBuild (m)
+}
+
+case class SbtLinkedBuild (m: CrossModule) extends LinkedBuild(m) {
+
+  protected def xProject(p: Project, tp: Target): Project = {
+    // if we can find a shared directory, link to it and create the project
+    val links = linkedSources(p)
+    xProject(p, tp, links)
+  }
+}
+
+abstract class LinkedBuild (m: CrossModule) extends CrossBuildOps {
 
   protected def xShared(tp: Target, hidden: Boolean = true): Project =
     Project(
       id = getSharedProjectId(m.id, tp.name),
       base = getSharedProjectBase(m.id, tp.name, hidden),
-      settings = SbtScalajs.noRootSettings ++ m.getDefaultSettings ++ tp.settings
-      //  ++ tp.settings ++ Seq(name := {
-      //  getSharedProjectName(m.id, tp.name)
-     // }
-     // )
+      settings = SbtScalajs.noRootSettings ++ m.getDefaultSettings ++ tp.settings ++
+        scalajsTargetSettings(tp.id) ++ CrossVersionSources(m.sharedLabel)
     )
 
   def jvmShared():  Project = xShared(m.targets.jvm)
@@ -87,42 +112,37 @@ case class SymLinkedBuild (m: CrossModule  ) extends CrossBuildOps {
 
   def jsProject(p: Project) = xProject(p, m.targets.js).enablePlugins(SbtScalajs)
 
-  private def xProject(p: Project, tp: Target): Project = {
-    // if we can find a shared directory, link to it
-
-    val links = SbtScalajs.linkToShared(m.getProjectBase(m.id, tp.name), s"../${m.sharedLabel}",m.sharedLabel )(m.log)
-    val setings:Seq[sbt.Def.Setting[_]] = p.settings
+  protected def xProject(p: Project, tp: Target, links: Seq[FileSettings]): Project = {
+    val settings:Seq[sbt.Def.Setting[_]] = p.settings
     val aggregates:Seq[sbt.ProjectReference] = p.aggregate
 
     // Create the project
     Project(
       id = m.getProjectId(m.id, tp.name),
       base = m.getProjectBase(m.id, tp.name),
-      settings = m.getDefaultSettings ++ tp.settings ++ links ++ Seq(
+      settings = m.getDefaultSettings ++ tp.settings ++ links  ++
+        scalajsTargetSettings(tp.id) ++ CrossVersionSharedSources(m.sharedLabel) ++ Seq(
         name := {
-        m.getProjectName(m.id, tp.name)
-      })
-    ).settings(setings:_*)
+          m.getProjectName(m.id, tp.name)
+        })
+    ).settings(settings:_*)
       .aggregate(aggregates:_*)
       .dependsOn(p.dependencies: _*)
       .enablePlugins(p.plugins)
-      //.disablePlugins(p.disablePlugins: _*)
+    //.disablePlugins(p.disablePlugins: _*)
   }
+
+  protected def xProject(p: Project, tp: Target): Project
 }
 
-case object SymLinkedBuild extends CrossBuildType {
-  def ops(m: CrossModule) = new SymLinkedBuild (m)
-}
 
-case class SharedBuild (m: CrossModule )
-    extends SharedBuildOpsBase[SharedBuild](m)
+case class SharedBuild (m: CrossModule) extends SharedBuildOpsBase (m)
 
 case object SharedBuild extends CrossBuildType {
   def ops(m: CrossModule) = new SharedBuild (m)
 }
 
-case class CommonBaseBuildOps (m: CrossModule  )
-  extends SharedBuildOpsBase[CommonBaseBuildOps] (m) {
+case class CommonBaseBuildOps (m: CrossModule) extends SharedBuildOpsBase  (m) {
 
   override def jsShared(shared: Project): Project = xShared(m.targets.js, true).enablePlugins(SbtScalajs)
 
@@ -135,13 +155,14 @@ case object CommonBaseBuild extends CrossBuildType {
   def ops(m: CrossModule) = new CommonBaseBuildOps (m)
 }
 
-abstract class SharedBuildOpsBase[B <: CrossBuildOps](m: CrossModule ) extends CrossBuildOps  {
+abstract class SharedBuildOpsBase(m: CrossModule ) extends CrossBuildOps  {
 
   protected def xShared(tp: Target, hidden: Boolean = false): Project =
     Project(
       id = getSharedProjectId(m.id, tp.name),
       base = getSharedProjectBase(m.id, tp.name, hidden),
-      settings = m.getDefaultSettings ++ tp.settings ++ Seq(name := {
+      settings = m.getDefaultSettings ++ tp.settings  ++
+        scalajsTargetSettings(tp.id) ++ CrossVersionSources(m.sharedLabel) ++ Seq(name := {
         getSharedProjectName(m.id, tp.name)
       }
     ))
@@ -156,86 +177,23 @@ abstract class SharedBuildOpsBase[B <: CrossBuildOps](m: CrossModule ) extends C
     if (hidden) m.base / s".${m.sharedLabel}_$projectDir" else m.base / m.sharedLabel
   }
 
-  def getSharedProjectId(projectId: String, projectDir: String) = {
-    s"${m.id}_${m.sharedLabel}_$projectDir"
-  }
+  def getSharedProjectId(projectId: String, projectDir: String) = s"${m.id}_${m.sharedLabel}_$projectDir"
 
-  def getSharedProjectName(projectId: String, projectDir: String) = {
-    s"${m.modulePrefix}${m.id}_${m.sharedLabel}"
-  }
+  def getSharedProjectName(projectId: String, projectDir: String) = s"${m.modulePrefix}${m.id}_${m.sharedLabel}"
 
   def jvmProject(depends: Project) = xProject(depends, m.targets.jvm)
 
   def jsProject(depends: Project) = xProject(depends, m.targets.js).enablePlugins(SbtScalajs)
 
   protected def xProject(depends: Project, tp: Target): Project = {
-    val aggregates: Seq[sbt.ProjectReference] = depends.aggregate
 
     Project(
       id = m.getProjectId(m.id, tp.name),
       base = m.getProjectBase(m.id, tp.name),
-      settings = m.getDefaultSettings ++ tp.settings ++ Seq(name := {
+      settings = m.getDefaultSettings ++ tp.settings  ++
+        scalajsTargetSettings(tp.id) ++ CrossVersionSources(m.sharedLabel) ++ Seq(name := {
         m.getProjectName(m.id, tp.name)
       })
     ).dependsOn(depends % "compile;test->test").aggregate(depends)
   }
-}
-
-
-case class CrossVersionBuild (m: CrossModule  ) extends CrossBuildOps {
-
-  protected def xShared(tp: Target, hidden: Boolean = true): Project =
-    Project(
-      id = getSharedProjectId(m.id, tp.name),
-      base = getSharedProjectBase(m.id, tp.name, hidden),
-      settings = SbtScalajs.noRootSettings ++ m.getDefaultSettings ++ tp.settings
-      //  ++ tp.settings ++ Seq(name := {
-      //  getSharedProjectName(m.id, tp.name)
-      // }
-      // )
-    )
-
-  def jvmShared():  Project = xShared(m.targets.jvm)
-
-  def jsShared(shared:  Project): Project =  xShared(m.targets.js)
-
-  override def getSharedProjectBase(projectId: String, projectDir: String, hidden: Boolean = false): File = {
-    m.base / m.sharedLabel
-  }
-
-  def getSharedProjectId(projectId: String, projectDir: String) = {
-    s"${m.id}_${m.sharedLabel}_$projectDir"
-  }
-
-  def getSharedProjectName(projectId: String, projectDir: String) = {
-    s"${m.modulePrefix}${m.id}_${m.sharedLabel}"
-  }
-  def jvmProject(p: Project) = xProject(p, m.targets.jvm) //.settings(SbtScalajs.XScalaJvmSources:_*)
-
-  def jsProject(p: Project) = xProject(p, m.targets.js).enablePlugins(SbtScalajs) //.settings(SbtScalajs.XScalaJsSources:_*)
-
-  private def xProject(p: Project, tp: Target): Project = {
-    // if we can find a shared directory, link to it
-    //val links = SbtScalajs.linkToShared(m.getProjectBase(m.id, tp.name), s"../${m.sharedLabel}")(m.log)
-    val setings:Seq[sbt.Def.Setting[_]] = p.settings
-    val aggregates:Seq[sbt.ProjectReference] = p.aggregate
-
-    // Create the project
-    Project(
-      id = m.getProjectId(m.id, tp.name),
-      base = m.base,
-      settings = m.getDefaultSettings ++ tp.settings ++ Seq(
-        name := {
-          m.getProjectName(m.id, tp.name)
-        })
-    ).settings(setings:_*)
-      .aggregate(aggregates:_*)
-      .dependsOn(p.dependencies: _*)
-      .enablePlugins(p.plugins)
-    //.disablePlugins(p.disablePlugins: _*)
-  }
-}
-
-case object CrossVersionBuild extends CrossBuildType {
-  def ops(m: CrossModule) = new CrossVersionBuild (m)
 }

@@ -6,16 +6,96 @@ An SBT plugin for [Scala,js](http://www.scala-js.org/).
 This plugin wraps the plugin supplied with scalajs as an auto-plugin and adds some pre-defined settings for cross-compiling 
 projects. Otherwise, usage and settings is a per the original.
 
+Also provided is the functionality of "modules" that:
+
+1. Provide a root module that creates aggregate only artifacts for all sub projects, by target type
+2. Group related projects together where there is more than target type
+3. Add extra pre-defined settings to single target modules, the same as for the cross build modules
+4. Add support for scala version specific code, also by target type
+5. Name artifacts with prefixes and by target type
+6. Define "how" cross builds with shared code is done:
+   * SymLinkedBuild - Symbolic links are created from the shared source to the platform specific code. Hence, there is just
+     one artifact per target type. This option works great with IntelliJ IDEA on Linux/OS X
+   * CommonBaseBuild - Shared code is compiled into its own library for each target by setting the sbt project to the
+     same directory. Hence, there are two artifacts per target type. This option works great with IntelliJ IDEA on all platforms
+   * SbtLinkedBuild - Shared source is linked by sbt to the platform specific code. Hence, there is just
+     one artifact per target type. This option works great with Eclipse on all platforms
+   * SharedBuild - Shared code is compiled into its own library for each target.  Hence, there are
+     two artifacts per target type. This option works great with Eclipse on all platforms
+7. Build types can be user defined in their local ".sbt" project. This allows developers to choose a build type to their
+   personal preference and for their choice of OS/IDE.
+8. CommonJs targets are supported.
+9. Additional target types can be defined,
+
+Concept
+=======
+
+A typical scala project will have a "src" directory - and not much else. Simple.
+
+A cross build project may have a few extra src directories for platform (ie. JVM/JS) specific code. Not much extra, but
+enough to complicate the build for many users.
+
+Now add in a mix of many sub-modules of which some cross-compile, aggregate release artifacts, users that all work on different
+ OS/IDE's. Then add common standards for all the modules. And finally make it easy for users to use. That's the goal of this
+  plugin - if you have a simple build requirements then this probably isn't for you.
+
+In order to cater for the different build types, a common structure is used to define a module.
+
+Root Module
+-----------
+
+For a multi module build, specify a CrossRootModule. Make sure all modules are in sub-directories. Example
+
+    lazy val rootModule = CrossRootModule(moduleName = "banana", defaultSettings = buildSettings)
+    lazy val root       = rootModule.project(rootJvm, rootJs)
+    lazy val rootJvm    = rootModule.jvmProject(rdfJvm, dbJvm, jena)
+    lazy val rootJs     = rootModule.jsProject(rdfJs, dbJs)
+
+This will create a root project called "bananaRoot" that will not be published. It will also create a Jvm and Js project
+that will build the specified projects and create two aggregate artifacts, banana_js and banana_jvm
+
+Modules
+-------
+For each module, create a CrossModule. Example:
+
+    lazy val dbModule = CrossModule(
+       id              = "db",           // the id of the module and prefix for all sub-projects
+       baseDir         = "DB",           // the base directory for all the sub-projects
+       build           = SharedBuild,    // the default build type - can be overriden in the users project in ~/.sbt/<ver>
+       defaultSettings = buildSettings,  // setting common to _all_ sub-projects
+       modulePrefix    = "banana-")      // prefix for all artifacts
+
+And then five projects:
+
+1. An aggregate project that will build the source projects. This is not published
+2. A JVM project with its settings and other SBT project descriptors. Takes as an argument the shared jvm project. If the
+   build type is SymLinkedBuild or LinkedSourceBuild then the settings from the shared project are copied over and the
+   shared code is compiled into this project.
+3. A JS project, as per the JVM project in 2)
+4. A jvm shared project. If the build type is SymLinkedBuild or LinkedSourceBuild then this project is not actually built
+5. A js shared project, as per 4)
+
+Example:
+
+    lazy val db          = dbModule.project(dbJvm, dbJs)
+    lazy val dbJvm       = dbModule.jvmProject(dbSharedJvm)
+    lazy val dbJs        = dbModule.jsProject(dbSharedJs)
+    lazy val dbSharedJvm = dbModule.jvmShared().settings(libraryDependencies +=  scalaz)
+    lazy val dbSharedJs  = dbModule.jsShared(dbSharedJvm).settings(sclalajsQuery ++ scalaz_js:_*)
+
 Usage
 =====
 
 To use this plugin, add a Resolver to the plugin and use the addSbtPlugin command within your project's `plugins.sbt` file:
  
-    addSbtPlugin("com.github.inthenow" % "sbt-scalajs" % "0.56.6")
+    addSbtPlugin("com.github.inthenow" % "sbt-scalajs" % "0.56.10")
 
 Your project's build file also needs to enable sbt-scalajs plugins. For example with build.sbt:
 
     lazy val root = (project in file(".")).enablePlugins(SbtScalajs)
+
+For more details, please see the templates in the example directory. Also within each template, is also a template directory
+with examples of user override files.
     
 Cross Compiling
 =====================
@@ -68,7 +148,6 @@ repeated in in each sub-directory. Note, however, that there is one important di
 put the new `.project` file in the sub-directory of the sub-project. 
 
 This is an important rule: Eclipse can only have one project per directory. It can however, import files from outside of the project.
- 
 
 
 Cross Compile, Multi_IDE Project

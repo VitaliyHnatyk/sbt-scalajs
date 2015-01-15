@@ -11,21 +11,21 @@ class XTargetTest extends FunSpec with Matchers {
     it("should work with no arguments") {
       val m = new JsTarget()
 
-      m.id shouldBe "JS"
+      m.id shouldBe "Js"
       m.name shouldBe "js"
-      m.settings shouldNot  equal(Seq())
+      m.settings should  equal(Seq())
     }
     it("Should work with just an ID") {
       val m =  new JsTarget("RDF")
 
       m.id shouldBe "RDF"
       m.name shouldBe "rdf"
-      m.settings shouldNot  equal(Seq())
+      m.settings should equal(Seq())
     }
     it("Should work with just settings") {
       val m =  new JsTarget(settings = Seq())
 
-      m.id shouldBe "JS"
+      m.id shouldBe "Js"
       m.name shouldBe "js"
       m.settings should  equal(Seq())
     }

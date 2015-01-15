@@ -46,8 +46,8 @@ object CrossversionBuild extends Build {
   lazy val dbModule = CrossModule(
     id              = "db",
     baseDir         = "db",
-    build           = SymLinkedBuild,
-    defaultSettings = buildSettings ++ SbtScalajs.XScalaSettings,
+    build           = CommonBaseBuild,
+    defaultSettings = buildSettings ++ SbtScalajs.XScalaMacroDependencies,
     modulePrefix    = "crossversion-")
 
   lazy val db          = dbModule.project(dbJvm, dbJs)

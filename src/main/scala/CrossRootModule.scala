@@ -4,30 +4,34 @@ import sbt._
 import sbt.Keys._
 import SbtScalajs._
 
-case class CrossRootModule(id: String = "root",
-                       baseDir: String = ".",
-                       moduleName: String,
-                       sharedLabel: String = "",
-                       defaultSettings: Seq[Def.Setting[_]] = Seq()) {
+case class CrossRootModule(moduleName: String,
+                           baseDir: String = ".",
+                           target: TargetsType = XTargets,
+                           sharedLabel: String = "",
+                           defaultSettings: Seq[Def.Setting[_]] = Seq()) {
+  val targets = target.targets
+  val jvm = targets.jvm
+  val js = targets.js
+  val commonJs = targets.commonJs
 
-  val jvmName = s"${moduleName}Jvm"
-  val jsName = s"${moduleName}Js"
+  val jvmName = s"${moduleName}${jvm.id}"
+  val jsName = s"${moduleName}${js.id}"
 
-  def jvmProject(cpd: ClasspathDep[ProjectReference]*): Project = mkProject(jvmName, scalajsJvmSettings, cpd:_*)
+  def jvmProject(cpd: ClasspathDep[ProjectReference]*): Project = mkProject(jvmName, jvm.settings, cpd: _*)
 
   def jsProject(cpd: ClasspathDep[ProjectReference]*): Project = {
-    mkProject(jsName, scalajsJvmSettings, cpd:_*).enablePlugins(SbtScalajs)
+    mkProject(jsName, js.settings, cpd: _*).enablePlugins(SbtScalajs)
   }
 
   def project(jvm: Project, js: Project): Project = Project(
-    id = id,
+    id = s"${moduleName}Root",
     base = file(baseDir),
-    settings = defaultSettings ++ SbtScalajs.noRootSettings
-  ).dependsOn(jvm , js )
-    .aggregate(jvm , js )
+    settings = defaultSettings ++ SbtScalajs.noPublishSettings
+  ).dependsOn(jvm, js)
+    .aggregate(jvm, js)
 
-  protected def mkProject(label:String, targetSettings:Seq[Setting[_]], cpd: ClasspathDep[ProjectReference]*): Project ={
-    val p:Seq[ProjectReference] = cpd.map(d => d.project)
+  protected def mkProject(label: String, targetSettings: Seq[Setting[_]], cpd: ClasspathDep[ProjectReference]*): Project = {
+    val p: Seq[ProjectReference] = cpd.map(d => d.project)
     Project(
       id = label,
       base = file(s".$label"),

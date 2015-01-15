@@ -12,7 +12,6 @@ class XModuleTest extends FunSpec with Matchers {
   val scalaz_js = Seq(libraryDependencies += "com.github.japgolly.fork.scalaz" %%% "scalaz-core" % "7.0.6")
 
   describe("An XModule") {
-
     it("Should create a new module with just an Id") {
 
       lazy val RDF = CrossModule(id = "rdf", build = SharedBuild) //, config = XShared)
@@ -23,8 +22,8 @@ class XModuleTest extends FunSpec with Matchers {
     }
 
   }
-  describe("A root XModule project") {
 
+  describe("A root XModule project") {
     val linked = false
     val rdfBuild = if (linked) SymLinkedBuild else SharedBuild
 
@@ -170,8 +169,8 @@ class XModuleTest extends FunSpec with Matchers {
 
     }
   }
-  describe("A real shared module") {
 
+  describe("A real shared module") {
     val build = SymLinkedBuild
     val module = CrossModule(id = "notests", build = build, modulePrefix = "banana-")
 
@@ -181,41 +180,32 @@ class XModuleTest extends FunSpec with Matchers {
     lazy val sharedjvm = module.jvmShared()
     lazy val sharedjs = module.jsShared(sharedjvm)
   }
-  describe("A single JVM module") {
 
-    //type X = SBuildJvm
+  describe("A single JVM module") {
     val module = Module (id = "notests", build = SingleBuild, target = JvmTarget, modulePrefix = "banana-")
 
     lazy val rdf = module.jvmProject
   }
 
   describe("A single JS module") {
-
-   // type X = SBuildJs
-    //val module = SModule[X#Targets, X#BuildOps](id = "notests", modulePrefix = "banana-")
-   val module = Module (id = "notests", build = SingleBuild, target = JsTarget, modulePrefix = "banana-")
-
+    val module = Module (id = "notests", build = SingleBuild, target = JsTarget, modulePrefix = "banana-")
     lazy val rdf = module.jsProject
   }
-  describe("A single custom JS module") {
 
+  describe("A single custom JS module") {
     object AndroidTarget  extends TargetType {
       val target:Target = new JsTarget(id ="androidJS")
     }
 
     val module = Module (id = "notests", build = SingleBuild, target = AndroidTarget, modulePrefix = "banana-")
-
     lazy val rdf = module.jsProject
   }
+
   describe("A single CommonJS module") {
-
-    //type X = SBuildCommonJs
-    //val module = SModule[X#Targets, X#BuildOps](id = "notests", modulePrefix = "banana-")
     val module = Module (id = "notests",  build = SingleBuild,target = CommonJsTarget, modulePrefix = "banana-")
-
     lazy val rdf: Project = module.jsProject
-
   }
+
   describe("A root module") {
 
     lazy val rootModule = CrossRootModule(moduleName = "MyModule")
@@ -240,8 +230,6 @@ class XModuleTest extends FunSpec with Matchers {
     lazy val sharedjvm2 = module.jvmShared()
     lazy val sharedjs2 = module.jsShared(sharedjvm2)
 
-//    type XJ = SBuildJvm
- //   lazy val jenaModule = SModule[XJ#Targets, XJ#BuildOps](id = "notests", modulePrefix = "banana-")
     lazy val jenaModule = Module(id = "notests", build = SingleBuild,target = JvmTarget,  modulePrefix = "banana-")
     lazy val jena = jenaModule.jvmProject
   }

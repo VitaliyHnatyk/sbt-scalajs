@@ -22,19 +22,19 @@ abstract class TargetBase(val id: String, val settings: Seq[Def.Setting[_]] = Se
   def setName(s: String):String = s.toLowerCase
 }
 
-class JsTarget(id: String = "JS", settings: Seq[Def.Setting[_]] = scalajsJsSettings) extends TargetBase(id, settings)
+class JsTarget(id: String = "Js", settings: Seq[Def.Setting[_]] = Seq()) extends TargetBase(id, settings)
 
 object JsTarget  extends TargetType {
   val target:Target = new JsTarget()
 }
 
-class CommonJsTarget(id: String = "CommonJS", settings: Seq[Def.Setting[_]] = scalajsCommonJsSettings) extends JsTarget(id, settings)
+class CommonJsTarget(id: String = "CommonJs", settings: Seq[Def.Setting[_]] = Seq()) extends JsTarget(id, settings)
 
 object CommonJsTarget extends TargetType {
   val target:Target =  new CommonJsTarget()
 }
 
-class JvmTarget(id: String = "JVM", settings: Seq[Def.Setting[_]] = scalajsJvmSettings) extends TargetBase(id, settings)
+class JvmTarget(id: String = "Jvm", settings: Seq[Def.Setting[_]] = Seq()) extends TargetBase(id, settings)
 
 object JvmTarget extends TargetType {
   val target:Target =   new JvmTarget()

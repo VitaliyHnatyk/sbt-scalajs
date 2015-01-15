@@ -22,7 +22,6 @@ dist
 .worksheet
 .local*
 *local*
+scala_shared*
 
 # Project specific file
-example/templates/libraries/notests/js/src/main/scala/shared
-example/templates/libraries/notests/jvm/src/main/scala/shared

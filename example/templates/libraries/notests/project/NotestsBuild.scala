@@ -48,7 +48,7 @@ object NotestsBuild extends Build {
   lazy val dbModule = CrossModule(
     id              = "db",
     baseDir         = "notestsDB",
-    build           = SharedBuild,
+    build           = SbtLinkedBuild,
     defaultSettings = buildSettings,
     modulePrefix    = "notests-")
 
