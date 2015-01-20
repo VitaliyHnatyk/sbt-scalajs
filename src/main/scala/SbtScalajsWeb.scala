@@ -3,11 +3,11 @@ package com.inthenow.sbt.scalajs
 import sbt._
 import sbt.Keys._
 import com.typesafe.sbt.web._
-import scala.scalajs.tools.io.{IO => _, _}
+///import scala.scalajs.tools.io.{IO => _, _}
 
 object SbtScalajsWeb extends AutoPlugin {
 
-  override def requires = SbtWeb
+  override def requires =  SbtWeb && SbtScalajs
 
   override def trigger = noTrigger
 
@@ -15,7 +15,8 @@ object SbtScalajsWeb extends AutoPlugin {
 
   import SbtWeb.autoImport._
   import WebKeys._
-  import scala.scalajs.sbtplugin.ScalaJSPlugin.ScalaJSKeys._
+  //import scala.scalajs.sbtplugin.ScalaJSPlugin.ScalaJSKeys._
+  import org.scalajs.sbtplugin.ScalaJSPlugin.AutoImport._
 
   override def globalSettings: Seq[Setting[_]] = SbtWeb.globalSettings
 

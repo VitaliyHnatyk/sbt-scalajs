@@ -1,7 +1,8 @@
 import sbt.Keys._
 import sbt._
 
-import scala.scalajs.sbtplugin.ScalaJSPlugin._
+import org.scalajs.sbtplugin._
+import ScalaJSPlugin.autoImport._
 
 object Dependencies {
   // Note: %%% can only be used within a task or setting macro, such as :=, +=, ++=, Def.task, or Def.setting...
@@ -18,7 +19,7 @@ object Dependencies {
    * @see http://scalaz.org
    * @see http://repo1.maven.org/maven2/com/github/japgolly/fork/scalaz
    */
-  val scalaz_js = Seq(libraryDependencies += "com.github.japgolly.fork.scalaz" %%% "scalaz-core" % "7.0.6")
+  val scalaz_js = Seq(libraryDependencies += "com.github.japgolly.fork.scalaz" %%%! "scalaz-core" % "7.1.0-4")
 
   /**
    * joda-Time
@@ -129,7 +130,7 @@ object Dependencies {
    * scala-js-dom
    * @see https://github.com/scala-js/scala-js-dom
    */
-  val sclalajsDom = Seq(libraryDependencies += "org.scala-lang.modules.scalajs" %%% "scalajs-dom" % "0.6")
+  val sclalajsDom = Seq(libraryDependencies += "org.scala-js" %%%! "scalajs-dom" % "0.7.0" ) // % "provided")
 
   /**
    * scala-js-jquery 

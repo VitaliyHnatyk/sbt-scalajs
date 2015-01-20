@@ -1,9 +1,8 @@
-package notests.build
-
 import sbt.Keys._
 import sbt._
 
-import scala.scalajs.sbtplugin.ScalaJSPlugin._
+import org.scalajs.sbtplugin._
+import ScalaJSPlugin.autoImport._
 
 object Dependencies {
   // Note: %%% can only be used within a task or setting macro, such as :=, +=, ++=, Def.task, or Def.setting...

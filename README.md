@@ -8,7 +8,7 @@ projects. Otherwise, usage and settings is a per the original.
 
 Also provided is the functionality of "modules" that:
 
-1. Provide a root module that creates aggregate only artifacts for all sub projects, by target type
+1. Provide a root module that creates a project that aggregates only artifacts for all sub projects, by target type
 2. Group related projects together where there is more than target type
 3. Add extra pre-defined settings to single target modules, the same as for the cross build modules
 4. Add support for scala version specific code, also by target type
@@ -25,7 +25,7 @@ Also provided is the functionality of "modules" that:
 7. Build types can be user defined in their local ".sbt" project. This allows developers to choose a build type to their
    personal preference and for their choice of OS/IDE.
 8. CommonJs targets are supported.
-9. Additional target types can be defined,
+9. Additional target types can be defined.
 
 Concept
 =======
@@ -44,12 +44,12 @@ In order to cater for the different build types, a common structure is used to d
 Root Module
 -----------
 
-For a multi module build, specify a CrossRootModule. Make sure all modules are in sub-directories. Example
+For a multi module build, specify a CrossModule of type "RootBuild". Make sure all modules are in sub-directories. Example
 
-    lazy val rootModule = CrossRootModule(moduleName = "banana", defaultSettings = buildSettings)
-    lazy val root       = rootModule.project(rootJvm, rootJs)
-    lazy val rootJvm    = rootModule.jvmProject(rdfJvm, dbJvm, jena)
-    lazy val rootJs     = rootModule.jsProject(rdfJs, dbJs)
+    lazy val rootModule = CrossModule(RootBuild, id = "banana", defaultSettings = buildSettings)
+    lazy val root       = rootModule.project(Module, rootJvm, rootJs)
+    lazy val rootJvm    = rootModule.project(Jvm, rdfJvm, dbJvm, jena)
+    lazy val rootJs     = rootModule.project(Js, rdfJs, dbJs)
 
 This will create a root project called "bananaRoot" that will not be published. It will also create a Jvm and Js project
 that will build the specified projects and create two aggregate artifacts, banana_js and banana_jvm
@@ -59,11 +59,11 @@ Modules
 For each module, create a CrossModule. Example:
 
     lazy val dbModule = CrossModule(
-       id              = "db",           // the id of the module and prefix for all sub-projects
-       baseDir         = "DB",           // the base directory for all the sub-projects
-       build           = SharedBuild,    // the default build type - can be overriden in the users project in ~/.sbt/<ver>
-       defaultSettings = buildSettings,  // setting common to _all_ sub-projects
-       modulePrefix    = "banana-")      // prefix for all artifacts
+      build           = SharedBuild,    // the default build type - can be overriden in the users project in ~/.sbt/<ver>
+      id              = "db",           // the id of the module and prefix for all sub-projects
+      baseDir         = "DB",           // the base directory for all the sub-projects
+      defaultSettings = buildSettings,  // setting common to _all_ sub-projects
+      modulePrefix    = "banana-")      // prefix for all artifacts
 
 And then five projects:
 
@@ -77,11 +77,11 @@ And then five projects:
 
 Example:
 
-    lazy val db          = dbModule.project(dbJvm, dbJs)
-    lazy val dbJvm       = dbModule.jvmProject(dbSharedJvm)
-    lazy val dbJs        = dbModule.jsProject(dbSharedJs)
-    lazy val dbSharedJvm = dbModule.jvmShared().settings(libraryDependencies +=  scalaz)
-    lazy val dbSharedJs  = dbModule.jsShared(dbSharedJvm).settings(sclalajsQuery ++ scalaz_js:_*)
+    lazy val db          = dbModule.project(Module, dbJvm, dbJs)
+    lazy val dbJvm       = dbModule.project(Jvm, dbSharedJvm)
+    lazy val dbJs        = dbModule.project(Js, dbSharedJs)
+    lazy val dbSharedJvm = dbModule.project(JvmShared).settings(libraryDependencies +=  scalaz)
+    lazy val dbSharedJs  = dbModule.project(JsShared).settings(sclalajsQuery ++ scalaz_js:_*)
 
 Usage
 =====

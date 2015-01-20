@@ -1,8 +1,7 @@
 import sbt._
 import sbt.Keys._
 import com.inthenow.sbt.scalajs._
-import scala.scalajs.sbtplugin.ScalaJSPlugin._
-
+ 
 object CrossversionBuild extends Build {
   import Dependencies._
 
@@ -10,18 +9,18 @@ object CrossversionBuild extends Build {
 
   lazy val buildSettings: Seq[Setting[_]] = Seq(
     organization := "com.github.CrossVersion",
-    scalaVersion := "2.11.4",
-    crossScalaVersions := Seq("2.11.4", "2.10.4"),
+    scalaVersion := "2.11.5",
+    crossScalaVersions := Seq("2.11.5", "2.10.4"),
     scalacOptions ++= Seq("-deprecation", "-unchecked")
   )
 
   /**
    * The root, aggregate project
    */
-  lazy val rootModule = CrossRootModule(moduleName = "CrossVersion", defaultSettings = buildSettings )
-  lazy val root       = rootModule.project(rootJvm, rootJs)
-  lazy val rootJvm    = rootModule.jvmProject(rdfJvm, dbJvm, jena)
-  lazy val rootJs     = rootModule.jsProject(rdfJs, dbJs)
+  lazy val rootModule = CrossModule(RootBuild,  id = "crossversion", defaultSettings = buildSettings)
+  lazy val root       = rootModule.project(Module, rootJvm, rootJs)
+  lazy val rootJvm    = rootModule.project(Jvm, rdfJvm, dbJvm, jena)
+  lazy val rootJs     = rootModule.project(Js, rdfJs, dbJs)
 
   /**
    * The RDF Module
@@ -34,11 +33,11 @@ object CrossversionBuild extends Build {
     modulePrefix    = "crossversion-"
   )
 
-  lazy val rdf          = rdfModule.project(rdfJvm, rdfJs)
-  lazy val rdfJvm       = rdfModule.jvmProject(rdfSharedJvm)
-  lazy val rdfJs        = rdfModule.jsProject(rdfSharedJs)
-  lazy val rdfSharedJvm = rdfModule.jvmShared()
-  lazy val rdfSharedJs  = rdfModule.jsShared(rdfSharedJvm)
+  lazy val rdf          = rdfModule.project(Module, rdfJvm, rdfJs)
+  lazy val rdfJvm       = rdfModule.project(Jvm, rdfSharedJvm)
+  lazy val rdfJs        = rdfModule.project(Js, rdfSharedJs)
+  lazy val rdfSharedJvm = rdfModule.project(JvmShared)
+  lazy val rdfSharedJs  = rdfModule.project(JsShared, rdfSharedJvm)
 
   /**
    * The Database Module
@@ -50,23 +49,22 @@ object CrossversionBuild extends Build {
     defaultSettings = buildSettings ++ SbtScalajs.XScalaMacroDependencies,
     modulePrefix    = "crossversion-")
 
-  lazy val db          = dbModule.project(dbJvm, dbJs)
-  lazy val dbJvm       = dbModule.jvmProject(dbSharedJvm)
-  lazy val dbJs        = dbModule.jsProject(dbSharedJs)
-  lazy val dbSharedJvm = dbModule.jvmShared().settings(libraryDependencies +=  scalaz)
-  lazy val dbSharedJs  = dbModule.jsShared(dbSharedJvm).settings(sclalajsQuery ++ scalaz_js:_*)
+  lazy val db          = dbModule.project(Module, dbJvm, dbJs)
+  lazy val dbJvm       = dbModule.project(Jvm, dbSharedJvm)
+  lazy val dbJs        = dbModule.project(Js, dbSharedJs)
+  lazy val dbSharedJvm = dbModule.project(JvmShared).settings(libraryDependencies +=  scalaz)
+  lazy val dbSharedJs  = dbModule.project(JsShared, dbSharedJvm).settings(sclalajsDom ++ scalaz_js:_*)
 
   /**
    * The Jena module, just a plain old JS/JVM  project
    */
-  lazy val jenaModule = Module(
+  lazy val jenaModule = CrossModule(SingleBuild,
     id              = "jena",
     baseDir         = "jena",
-    build           = SingleBuild,
-    target          = JvmTarget,
-    defaultSettings = buildSettings,
-    modulePrefix    = "crossversion-"
-  )
 
-  lazy val jena = jenaModule.jsProject
+    defaultSettings = buildSettings,
+    modulePrefix    = "crossversion-")
+
+  lazy val jena = jenaModule.project(Jvm(id="SSS"))
+   
 }

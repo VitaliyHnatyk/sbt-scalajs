@@ -1,7 +1,11 @@
 package com.inthenow.sbt.scalajs
 
+//import org.scalajs.sbtplugin.ScalaJSPlugin
 import sbt._
 import sbt.Keys._
+
+import org.scalajs.sbtplugin._
+import org.scalajs.sbtplugin.ScalaJSPlugin.AutoImport._
 
 object Import {
 
@@ -15,11 +19,12 @@ object SbtScalajs extends AutoPlugin {
 
   type FileSettings = Def.Setting[Seq[File]]
 
-  override def requires = sbt.plugins.JvmPlugin
+ /// override def requires = sbt.plugins.JvmPlugin
+ override def requires = ScalaJSPlugin
 
-  import scala.scalajs.sbtplugin.ScalaJSPlugin.ScalaJSKeys._
-  import scala.scalajs.sbtplugin.ScalaJSPlugin._
-
+ /// import scala.scalajs.sbtplugin.ScalaJSPlugin.ScalaJSKeys._
+ /// import scala.scalajs.sbtplugin.ScalaJSPlugin._
+  //import org.scalajs.sbtplugin.ScalaJSPlugin.AutoImport._
   private val scalaJsManaged =   "scalajs_managed/js"
 
 
@@ -60,7 +65,7 @@ object SbtScalajs extends AutoPlugin {
       (crossTarget in packageJSDependencies) in Compile := (crossTarget in Compile).value / scalaJsManaged,
       (crossTarget in packageJSDependencies) in Test := (crossTarget in Test).value / scalaJsManaged
     )
-  } ++ scalaJSSettings
+  } //++ scalaJSSettings
 
   val postScalaJSSettings = {
     Seq(
@@ -68,11 +73,11 @@ object SbtScalajs extends AutoPlugin {
   }
 
   val compileAutoOpt = Seq(
-    ScalaJSKeys.fastOptJS in Compile <<= (ScalaJSKeys.fastOptJS in Compile) dependsOn (compile in Compile) triggeredBy (compile in Compile)
+    fastOptJS in Compile <<= (fastOptJS in Compile) dependsOn (compile in Compile) triggeredBy (compile in Compile)
   )
 
   val testAutoOpt = Seq(
-    ScalaJSKeys.fastOptJS in Test <<= (ScalaJSKeys.fastOptJS in Test) dependsOn (fastOptJS in Compile) triggeredBy (compile in Test)
+    fastOptJS in Test <<= ( fastOptJS in Test) dependsOn (fastOptJS in Compile) triggeredBy (compile in Test)
   )
 
   val autoOpt = compileAutoOpt ++ testAutoOpt
@@ -190,7 +195,7 @@ object SbtScalajs extends AutoPlugin {
   )
 
   val concatAllSjsDependencies = Seq(
-    skip in ScalaJSKeys.packageJSDependencies := false
+    skip in packageJSDependencies := false
   )
 
 
@@ -210,7 +215,7 @@ object SbtScalajs extends AutoPlugin {
         }
       })
 
-  def CrossVersionSources(label:String) : Seq[Setting[_]] =
+  def CrossVersionSources() : Seq[Setting[_]] =
     Seq(Compile, Test).map { sc =>
       unmanagedSourceDirectories in sc <++= (sourceDirectory in sc, scalaBinaryVersion) {
         (s, v) => Seq(s / ("scala_" + v) )

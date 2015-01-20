@@ -1,41 +1,75 @@
 package com.inthenow.sbt.scalajs
 
+import com.inthenow.sbt.scalajs.SbtScalajs._
 import sbt._
-import SbtScalajs._
 
-trait Target{
-  val settings: Seq[Def.Setting[_]]
-  val id: String
-  val name: String
+case class Target(t: TargetType, id: String, name: String, settings: Seq[Def.Setting[_]], sharedSettings: Seq[Def.Setting[_]]) {
 
-  def setName(s: String):String
+  def mkProject(p: Project) = t.mkProject(p)
+  def mkProject(b: RootBuild, p: Project*):Project       = t.mkRootProject(this, b, p: _*)
+  def mkProject(b: SingleBuild, p: Project*):Project     = t.mkSingleProject(this, b, p: _*)
+  def mkProject(b: SharedBuild, p: Project*):Project     = t.mkSharedProject(this, b, p: _*)
+  def mkProject(b: CommonBaseBuild, p: Project*):Project = t.mkCommonBaseProject(this, b, p: _*)
+  def mkProject(b: SymLinkedBuild, p: Project*):Project  = t.mkSymLinkedProject(this, b, p: _*)
+  def mkProject(b: SbtLinkedBuild, p: Project*):Project  = t.mkSbtLinkedProject(this, b, p: _*)
+
 }
 
-trait TargetType {
-  val target:Target
+object Target {
+  def apply(m: ModuleOps, t: Target ): Target = {
+    val tt = t.t
+    Target(t.t, t.id, t.name, t.settings ++ tt. getDefaultSettings(m, t), tt.getDefaultSharedSettings(m,t ))
+  }
 }
 
-abstract class TargetBase(val id: String, val settings: Seq[Def.Setting[_]] = Seq()) extends Target {
+trait TargetOps {
+  def getDefaultSettings(m: ModuleOps, t: Target): Seq[Def.Setting[_]] = {
+    scalajsTargetSettings(t.name) ++ CrossVersionSources()
+  }
 
-  val name: String = setName(id)
+  def getDefaultSharedSettings(m: ModuleOps, t: Target): Seq[Def.Setting[_]] = {
+    CrossVersionSharedSources(m.sharedLabel)
+  }
 
-  def setName(s: String):String = s.toLowerCase
+  def mkProject(p: Project): Project = p
+
+  def mkRootProject(t: Target, b: RootBuild, cpd: Project*): Project = {
+    RootBuildProjectOps(b).mkProject(t, cpd: _*)
+  }
+
+  def mkSingleProject(t: Target, b: SingleBuild, cpd: Project*): Project = {
+    SingleBuildProjectOps(b).mkProject(t, cpd: _*)
+  }
+
+  def mkSharedProject(t: Target, b: SharedBuild, cpd: Project*): Project = {
+    SharedBuildProjectOps(b).mkProject(t, cpd: _*)
+  }
+
+  def mkSymLinkedProject(t: Target, b: SymLinkedBuild, cpd: Project*): Project = {
+    SymLinkedBuildProjectOps(b) mkProject(t, cpd: _*)
+  }
+
+  def mkSbtLinkedProject(t: Target, b: SbtLinkedBuild, cpd: Project*): Project = {
+    SbtLinkedBuildProjectOps(b).mkProject(t, cpd: _*)
+  }
+
+  def mkCommonBaseProject(t: Target, b: CommonBaseBuild, cpd: Project*): Project = {
+    CommonBaseBuildProjectOps(b).mkProject(t, cpd: _*)
+  }
 }
 
-class JsTarget(id: String = "Js", settings: Seq[Def.Setting[_]] = Seq()) extends TargetBase(id, settings)
-
-object JsTarget  extends TargetType {
-  val target:Target = new JsTarget()
+trait TargetType extends TargetOps {
+  def apply(id: String = "",
+            name: String = "",
+            settings: Seq[Def.Setting[_]] = Seq(),
+            sharedSettings: Seq[Def.Setting[_]] = Seq()): Target
 }
 
-class CommonJsTarget(id: String = "CommonJs", settings: Seq[Def.Setting[_]] = Seq()) extends JsTarget(id, settings)
 
-object CommonJsTarget extends TargetType {
-  val target:Target =  new CommonJsTarget()
-}
 
-class JvmTarget(id: String = "Jvm", settings: Seq[Def.Setting[_]] = Seq()) extends TargetBase(id, settings)
 
-object JvmTarget extends TargetType {
-  val target:Target =   new JvmTarget()
-}
+
+
+
+
+
