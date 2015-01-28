@@ -5,6 +5,7 @@ import com.inthenow.sbt.scalajs._
 object NotestsBuild extends Build {
   import Dependencies._
 
+
   implicit val logger: Logger = ConsoleLogger()
 
   lazy val buildSettings: Seq[Setting[_]] = Seq(
@@ -19,14 +20,14 @@ object NotestsBuild extends Build {
    */
   lazy val rootM    = CrossModule(RootBuild,  id = "notests", defaultSettings = buildSettings)
   lazy val root     = rootM.project(Module, rootJvm, rootJs)
-  lazy val rootJvm  = rootM.project(Jvm, rdfJvm, dbJvm, jena)
+  lazy val rootJvm  = rootM.project(Jvm, rdfJvm, dbJvm, jena, sesameJvm)
   lazy val rootJs   = rootM.project(Js, rdfJs, dbJs)
 
   /**
    * The RDF Module
    */
   lazy val rdfM = CrossModule(
-    build           = SbtLinkedBuild,
+    buildType       = SbtLinkedBuild,
     id              = "rdf",
     baseDir         = "rdf",
     defaultSettings = buildSettings,
@@ -36,14 +37,14 @@ object NotestsBuild extends Build {
   lazy val rdf          = rdfM.project(Module, rdfJvm, rdfJs)
   lazy val rdfJvm       = rdfM.project(Jvm, rdfSharedJvm)
   lazy val rdfJs        = rdfM.project(Js, rdfSharedJs)
-  lazy val rdfSharedJvm = rdfM.project(JvmShared)
-  lazy val rdfSharedJs  = rdfM.project(JsShared)
+  lazy val rdfSharedJvm = rdfM.project(Jvm, Shared)
+  lazy val rdfSharedJs  = rdfM.project(Js, Shared)
 
   /**
    * The Database Module
    */
   lazy val dbM      = CrossModule(
-    build           = SbtLinkedBuild,
+    buildType       = SharedBuild,
     id              = "db",
     baseDir         = "notestsDB",
     defaultSettings = buildSettings,
@@ -52,8 +53,8 @@ object NotestsBuild extends Build {
   lazy val db          = dbM.project(Module, dbJvm, dbJs)
   lazy val dbJvm       = dbM.project(Jvm, dbSharedJvm)
   lazy val dbJs        = dbM.project(Js, dbSharedJs)
-  lazy val dbSharedJvm = dbM.project(JvmShared).settings(libraryDependencies +=  parboiled2)
-  lazy val dbSharedJs  = dbM.project(JsShared).settings(uTest:_*)
+  lazy val dbSharedJvm = dbM.project(Jvm, Shared).settings(libraryDependencies +=  scalaz)
+  lazy val dbSharedJs  = dbM.project(Js, Shared).settings(sclalajsDom ++ scalaz_js:_*)
 
   /**
    * The Jena module, just a plain old JS/JVM  project
@@ -65,4 +66,24 @@ object NotestsBuild extends Build {
     modulePrefix      = "notests-")
 
   lazy val jena = jenaModule.project(Jvm(id="SSS"))
+
+  /**
+   * The Sesame module, just a plain old JVM  project, but in a shared project so we can specialise later
+   */
+  lazy val sesameM = CrossModule(SbtLinkedBuild,
+    id                = "sesame",
+    baseDir           = "sesame",
+    defaultSettings   = buildSettings,
+    modulePrefix      = "notests-",
+    sharedLabel       = "common")
+
+  lazy val sesame          = sesameM.project(Module, sesameJvm)
+  lazy val sesameJvm       = sesameM.project(Jvm,sesameCommonJvm)
+  lazy val sesameCommonJvm = sesameM.project(Jvm,Shared)
+
+  val buildInitTask = TaskKey[Unit]("build-init", "")
+
+  //buildInitTask =
+
+
 }

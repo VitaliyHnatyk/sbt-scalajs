@@ -80,8 +80,19 @@ Example:
     lazy val db          = dbModule.project(Module, dbJvm, dbJs)
     lazy val dbJvm       = dbModule.project(Jvm, dbSharedJvm)
     lazy val dbJs        = dbModule.project(Js, dbSharedJs)
-    lazy val dbSharedJvm = dbModule.project(JvmShared).settings(libraryDependencies +=  scalaz)
-    lazy val dbSharedJs  = dbModule.project(JsShared).settings(sclalajsQuery ++ scalaz_js:_*)
+    lazy val dbSharedJvm = dbModule.project(Jvm, Shared).settings(libraryDependencies +=  scalaz)
+    lazy val dbSharedJs  = dbModule.project(Js, Shared).settings(sclalajsQuery ++ scalaz_js:_*)
+
+How it works
+------------
+
+The module is just a factory for sbt projects, the "buildType" argument specifying the type of factory to create and
+has a project method that creates a new Sbt.Project. All
+Buildtypes implement just four methods that define the id, base directory
+
+Current
+options detailed above
+
 
 Usage
 =====

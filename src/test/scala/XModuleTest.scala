@@ -19,7 +19,7 @@ class XModuleTest extends FunSpec with Matchers {
       val RDF = CrossModule(RootBuild, id = "rdf")
 
       RDF.id shouldBe "rdf"
-      RDF.moduleOps.base.getName shouldBe "."
+      RDF.moduleOps.getBase.getName shouldBe "."
       RDF.defaultSettings shouldBe Seq()
     }
 
@@ -30,27 +30,33 @@ class XModuleTest extends FunSpec with Matchers {
         val RDF = CrossModule(SharedBuild, id = "rdf" ) //, config = XShared)
 
       RDF.id shouldBe "rdf"
-      RDF.moduleOps.base.getName shouldBe "."
+      RDF.moduleOps.getBase.getName shouldBe "."
       RDF.defaultSettings shouldBe Seq()
     }
 
   }
 
-  describe("A root XModule project") {
-    val linked = true
+  describe("A cross module root project") {
+    val linked = false
     val rdfBuild = if (linked) SymLinkedBuild else SharedBuild
 
     lazy val RDF            = CrossModule(rdfBuild, id = "rdf" )
     lazy val rdf            = RDF.project(Module, rdf_jvm, rdf_js)
     lazy val rdf_jvm        = RDF.project(Jvm, rdf_common_jvm)
-    lazy val rdf_common_jvm = RDF.project(JvmShared).settings(
+    lazy val rdf_common_jvm = RDF.project(Jvm, Shared).settings(
       libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.0" % "test"
     )
 
     lazy val rdf_js = RDF.project(Js, rdf_common_js)
-    lazy val rdf_common_js = RDF.project(JsShared, rdf_common_jvm).settings(scalaz_js: _*)
+    lazy val rdf_common_js = RDF.project(Js,Shared, rdf_common_jvm).settings(scalaz_js: _*)
 
-    it("should create a new project ") {
+    it("should create a new module ") {
+
+      RDF.id shouldBe "rdf"
+      RDF.moduleOps.getBase.getName shouldBe "."
+    }
+
+    it("should create a new module project ") {
 
       rdf.id shouldBe "rdf"
       rdf.base.getName shouldBe "."
@@ -58,13 +64,13 @@ class XModuleTest extends FunSpec with Matchers {
 
     it("should create a new jvm project ") {
       rdf_jvm.id shouldBe "rdf_jvm"
-      rdf_jvm.base.getName shouldBe "jvm"
+      rdf_jvm.base.getName shouldBe ".jvm"
 
     }
 
     it("should create a new js project ") {
       rdf_js.id shouldBe "rdf_js"
-      rdf_js.base.getName shouldBe "js"
+      rdf_js.base.getName shouldBe ".js"
 
     }
     it("should create a new jvm common project ") {
@@ -74,7 +80,7 @@ class XModuleTest extends FunSpec with Matchers {
       }
       else {
         rdf_common_jvm.id shouldBe "rdf_shared_jvm"
-        rdf_common_jvm.base.getName shouldBe "shared"
+        rdf_common_jvm.base.getName shouldBe ".shared_jvm"
       }
     }
 
@@ -98,12 +104,12 @@ class XModuleTest extends FunSpec with Matchers {
 
       lazy val rdf_jvm = RDF.project(Jvm, rdf_common_jvm)
 
-      lazy val rdf_common_jvm = RDF.project(JvmShared).settings(
+      lazy val rdf_common_jvm = RDF.project(Jvm,Shared).settings(
         libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.0" % "test"
       )
 
       lazy val rdf_js = RDF.project(Js, rdf_common_js)
-      lazy val rdf_common_js = RDF.project(JsShared, rdf_common_jvm).settings(scalaz_js: _*)
+      lazy val rdf_common_js = RDF.project(Js,Shared).settings(scalaz_js: _*)
 
       it("should create a new project ") {
 
@@ -113,13 +119,13 @@ class XModuleTest extends FunSpec with Matchers {
 
       it("should create a new jvm project ") {
         rdf_jvm.id shouldBe "rdf_jvm"
-        rdf_jvm.base.getPath shouldBe "rdf/jvm"
+        rdf_jvm.base.getPath shouldBe "rdf/.jvm"
 
       }
 
       it("should create a new js project ") {
         rdf_js.id shouldBe "rdf_js"
-        rdf_js.base.getPath shouldBe "rdf/js"
+        rdf_js.base.getPath shouldBe "rdf/.js"
 
       }
       it("should create a new jvm common project ") {
@@ -138,21 +144,19 @@ class XModuleTest extends FunSpec with Matchers {
     describe("A non-root XModule project with custom target") {
 
       val ibmJVM = Jvm(id = "ibmJVM", name ="ibmjvm")
-      val ibmJvmShared = JvmShared(id = "ibmJVM", name ="ibmjvm")
       val js  = CommonJs  (id="js", name ="js")
-      val jsSharded = CommonJsShared (id="js", name ="js")
+
 
       lazy val RDF = CrossModule(SharedBuild, id = "rdf",  baseDir = "rdf", sharedLabel = "common")
+
       lazy val rdf = RDF.project(Module, rdf_jvm, rdf_js)
-
       lazy val rdf_jvm = RDF.project(ibmJVM, rdf_common_jvm)
-
-      lazy val rdf_common_jvm = RDF.project(ibmJvmShared).settings(
+      lazy val rdf_common_jvm = RDF.project(ibmJVM, Shared).settings(
         libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.0" % "test"
       )
 
       lazy val rdf_js = RDF.project(js, rdf_common_js)
-      lazy val rdf_common_js = RDF.project(jsSharded,rdf_common_jvm).settings(scalaz_js: _*)
+      lazy val rdf_common_js = RDF.project(js, Shared).settings(scalaz_js: _*)
 
       it("should create a new project ") {
 
@@ -162,13 +166,13 @@ class XModuleTest extends FunSpec with Matchers {
 
       it("should create a new jvm project ") {
         rdf_jvm.id shouldBe "rdf_ibmjvm"
-        rdf_jvm.base.getPath shouldBe "rdf/ibmjvm"
+        rdf_jvm.base.getPath shouldBe "rdf/.ibmjvm"
 
       }
 
       it("should create a new js project ") {
         rdf_js.id shouldBe "rdf_js"
-        rdf_js.base.getPath shouldBe "rdf/js"
+        rdf_js.base.getPath shouldBe "rdf/.js"
 
       }
       it("should create a new jvm common project ") {
@@ -191,8 +195,8 @@ class XModuleTest extends FunSpec with Matchers {
       lazy val rdf = module.project(Module, prjJvm, prjJs)
       lazy val prjJvm = module.project(Jvm, sharedjvm)
       lazy val prjJs = module.project(Js, sharedjs)
-      lazy val sharedjvm = module.project(JvmShared)
-      lazy val sharedjs = module.project(JsShared,sharedjvm)
+      lazy val sharedjvm = module.project(Jvm,Shared)
+      lazy val sharedjs = module.project(Js, Shared)
     }
 
   describe("A single JVM module") {

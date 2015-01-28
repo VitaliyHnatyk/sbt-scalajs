@@ -28,7 +28,7 @@ object CrossversionBuild extends Build {
   lazy val rdfModule = CrossModule(
     id              = "rdf",
     baseDir         = "rdf",
-    build           = SymLinkedBuild,
+    buildType       = SymLinkedBuild,
     defaultSettings = buildSettings,
     modulePrefix    = "crossversion-"
   )
@@ -36,8 +36,8 @@ object CrossversionBuild extends Build {
   lazy val rdf          = rdfModule.project(Module, rdfJvm, rdfJs)
   lazy val rdfJvm       = rdfModule.project(Jvm, rdfSharedJvm)
   lazy val rdfJs        = rdfModule.project(Js, rdfSharedJs)
-  lazy val rdfSharedJvm = rdfModule.project(JvmShared)
-  lazy val rdfSharedJs  = rdfModule.project(JsShared, rdfSharedJvm)
+  lazy val rdfSharedJvm = rdfModule.project(Jvm, Shared)
+  lazy val rdfSharedJs  = rdfModule.project(Js, Shared)
 
   /**
    * The Database Module
@@ -45,15 +45,15 @@ object CrossversionBuild extends Build {
   lazy val dbModule = CrossModule(
     id              = "db",
     baseDir         = "db",
-    build           = CommonBaseBuild,
+    buildType           = CommonBaseBuild,
     defaultSettings = buildSettings ++ SbtScalajs.XScalaMacroDependencies,
     modulePrefix    = "crossversion-")
 
   lazy val db          = dbModule.project(Module, dbJvm, dbJs)
   lazy val dbJvm       = dbModule.project(Jvm, dbSharedJvm)
   lazy val dbJs        = dbModule.project(Js, dbSharedJs)
-  lazy val dbSharedJvm = dbModule.project(JvmShared).settings(libraryDependencies +=  scalaz)
-  lazy val dbSharedJs  = dbModule.project(JsShared, dbSharedJvm).settings(sclalajsDom ++ scalaz_js:_*)
+  lazy val dbSharedJvm = dbModule.project(Jvm, Shared).settings(libraryDependencies +=  scalaz)
+  lazy val dbSharedJs  = dbModule.project(Js, Shared, dbSharedJvm).settings(sclalajsDom ++ scalaz_js:_*)
 
   /**
    * The Jena module, just a plain old JS/JVM  project

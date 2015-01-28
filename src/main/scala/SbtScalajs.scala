@@ -160,7 +160,6 @@ object SbtScalajs extends AutoPlugin {
    * @return a sequence of cleanfile settings so that the build can remove the links via a clean command
    */
   def linkToShared(base: File, pathToShared: String, label: String)(implicit log: Logger): Seq[FileSettings] = {
-
     // returns list of subdirectories of dir that start with "prefix". Files have full path
     def getSub(dir: File, prefix:String): List[File] = {
       if (dir.exists()) dir.listFiles.filter(_.isDirectory).filter(_.getName.startsWith(prefix)).toList
@@ -223,7 +222,7 @@ object SbtScalajs extends AutoPlugin {
     }
 
   def scalajsTargetSettings(name:String): Seq[Setting[_]] = {
-    Seq(target := baseDirectory.value / "target" / name)
+    Seq(target := baseDirectory.value / "target" / name, cleanFiles += baseDirectory.value / "target", cleanFiles += baseDirectory.value / "target" / name)
   }
 
   def CrossVersionSharedSources(label:String) : Seq[Setting[_]] =
