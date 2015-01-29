@@ -9,7 +9,7 @@ class ModuleOps(target:Target, projectOps: ProjectOps) extends TargetOps(target,
      b match {
       //case s:RootBuild => println ("aa")
       case _ =>  {
-        val p= projectOps.crossModuleParams(this,false, SbtScalajs.noRootSettings ++ projectOps.moduleNameSettings, Seq() )
+        val p= projectOps.crossModuleParams(this,SbtScalajs.noRootSettings ++ projectOps.moduleNameSettings, params.projects)
         val o = projectOps.crossModuleOptions.copy(addProjects = true)
         super.mkProject(b,p,o)
       }

@@ -42,12 +42,12 @@ class XModuleTest extends FunSpec with Matchers {
 
     lazy val RDF            = CrossModule(rdfBuild, id = "rdf" )
     lazy val rdf            = RDF.project(Module, rdf_jvm, rdf_js)
-    lazy val rdf_jvm        = RDF.project(Jvm, rdf_common_jvm)
+    lazy val rdf_jvm        = RDF.project(Jvm, Empty, rdf_common_jvm)
     lazy val rdf_common_jvm = RDF.project(Jvm, Shared).settings(
       libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.0" % "test"
     )
 
-    lazy val rdf_js = RDF.project(Js, rdf_common_js)
+    lazy val rdf_js = RDF.project(Js, Empty, rdf_common_js)
     lazy val rdf_common_js = RDF.project(Js,Shared, rdf_common_jvm).settings(scalaz_js: _*)
 
     it("should create a new module ") {
@@ -65,7 +65,6 @@ class XModuleTest extends FunSpec with Matchers {
     it("should create a new jvm project ") {
       rdf_jvm.id shouldBe "rdf_jvm"
       rdf_jvm.base.getName shouldBe ".jvm"
-
     }
 
     it("should create a new js project ") {
@@ -102,13 +101,13 @@ class XModuleTest extends FunSpec with Matchers {
       lazy val RDF = CrossModule(build, id = "rdf",  baseDir = "rdf", sharedLabel = "common")
       lazy val rdf = RDF.project(Module, rdf_jvm, rdf_js)
 
-      lazy val rdf_jvm = RDF.project(Jvm, rdf_common_jvm)
+      lazy val rdf_jvm = RDF.project(Jvm,Empty, rdf_common_jvm)
 
       lazy val rdf_common_jvm = RDF.project(Jvm,Shared).settings(
         libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.0" % "test"
       )
 
-      lazy val rdf_js = RDF.project(Js, rdf_common_js)
+      lazy val rdf_js = RDF.project(Js, Empty, rdf_common_js)
       lazy val rdf_common_js = RDF.project(Js,Shared).settings(scalaz_js: _*)
 
       it("should create a new project ") {
@@ -150,12 +149,12 @@ class XModuleTest extends FunSpec with Matchers {
       lazy val RDF = CrossModule(SharedBuild, id = "rdf",  baseDir = "rdf", sharedLabel = "common")
 
       lazy val rdf = RDF.project(Module, rdf_jvm, rdf_js)
-      lazy val rdf_jvm = RDF.project(ibmJVM, rdf_common_jvm)
+      lazy val rdf_jvm = RDF.project(ibmJVM,Empty, rdf_common_jvm)
       lazy val rdf_common_jvm = RDF.project(ibmJVM, Shared).settings(
         libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.0" % "test"
       )
 
-      lazy val rdf_js = RDF.project(js, rdf_common_js)
+      lazy val rdf_js = RDF.project(js,Empty, rdf_common_js)
       lazy val rdf_common_js = RDF.project(js, Shared).settings(scalaz_js: _*)
 
       it("should create a new project ") {

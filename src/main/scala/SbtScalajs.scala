@@ -119,13 +119,16 @@ object SbtScalajs extends AutoPlugin {
     addDirectories(fullPath, dir)
   }
 
-  def linkedSources(sharedSrc: Project): Seq[FileSettings] = Seq(
+  def linkedSources(sharedSrc: Project)(implicit log:Logger): Seq[FileSettings] = {
     // pseudo link shared files from jvm source/resource directories to js
-    unmanagedSourceDirectories in Compile ++= (unmanagedSourceDirectories in(sharedSrc, Compile)).value,
-    unmanagedSourceDirectories in Test ++= (unmanagedSourceDirectories in(sharedSrc, Test)).value,
-    unmanagedResourceDirectories in Compile ++= (unmanagedResourceDirectories in(sharedSrc, Compile)).value,
-    unmanagedResourceDirectories in Test ++= (unmanagedResourceDirectories in(sharedSrc, Test)).value
-  )
+    log.debug(s"Creating Sbt links to ${sharedSrc.id}")
+    Seq(
+      unmanagedSourceDirectories in Compile ++= (unmanagedSourceDirectories in(sharedSrc, Compile)).value,
+      unmanagedSourceDirectories in Test ++= (unmanagedSourceDirectories in(sharedSrc, Test)).value,
+      unmanagedResourceDirectories in Compile ++= (unmanagedResourceDirectories in(sharedSrc, Compile)).value,
+      unmanagedResourceDirectories in Test ++= (unmanagedResourceDirectories in(sharedSrc, Test)).value
+    )
+  }
 
 
   /**

@@ -31,7 +31,7 @@ trait CrossModuleOps {
   def project(t: Target, projectType:ProjectType, projects: Project*): Project
 }
 
-class StdCrossModuleOps(val crossModule: CrossModule) extends CrossModuleOps  {
+class StdCrossModuleOps(val crossModule: CrossModule)( implicit val log: Logger) extends CrossModuleOps  {
 
   val moduleOps =  this
 
@@ -81,8 +81,8 @@ class StdCrossModuleOps(val crossModule: CrossModule) extends CrossModuleOps  {
 }
 
 trait CrossModuleType {
-  def apply(crossModule: CrossModule): CrossModuleOps
+  def apply(crossModule: CrossModule)( implicit log: Logger): CrossModuleOps
 }
 case object StdCrossModuleType extends CrossModuleType  {
-  def apply(crossModule: CrossModule): CrossModuleOps = new StdCrossModuleOps(crossModule)
+  def apply(crossModule: CrossModule)( implicit log: Logger): CrossModuleOps = new StdCrossModuleOps(crossModule)
 }

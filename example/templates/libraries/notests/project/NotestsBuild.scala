@@ -54,7 +54,7 @@ object NotestsBuild extends Build {
   lazy val dbJvm       = dbM.project(Jvm, dbSharedJvm)
   lazy val dbJs        = dbM.project(Js, dbSharedJs)
   lazy val dbSharedJvm = dbM.project(Jvm, Shared).settings(libraryDependencies +=  scalaz)
-  lazy val dbSharedJs  = dbM.project(Js, Shared).settings(sclalajsDom ++ scalaz_js:_*)
+  lazy val dbSharedJs  = dbM.project(Js, Shared).settings(scalaz_js:_*)
 
   /**
    * The Jena module, just a plain old JS/JVM  project
@@ -78,12 +78,7 @@ object NotestsBuild extends Build {
     sharedLabel       = "common")
 
   lazy val sesame          = sesameM.project(Module, sesameJvm)
-  lazy val sesameJvm       = sesameM.project(Jvm,sesameCommonJvm)
+  lazy val sesameJvm       = sesameM.project(Jvm,Empty, sesameCommonJvm)
   lazy val sesameCommonJvm = sesameM.project(Jvm,Shared)
-
-  val buildInitTask = TaskKey[Unit]("build-init", "")
-
-  //buildInitTask =
-
 
 }

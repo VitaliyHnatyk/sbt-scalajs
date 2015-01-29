@@ -42,11 +42,12 @@ abstract class  TargetOps(val target: Target,val projectOps: ProjectOps) {
     val p = Project(
       id = params.id,
       base = params.base,
-      settings = params.settings ++ buildInit ++ copyProject
+      settings = params.settings ++ buildInit ++ copyProject //).distinct
     )
 
     val result = if(options.addProjects) p.addProjects(params.projects) else p
-     if (options.callPostTarget) mkProject(result) else result
+
+    if (options.callPostTarget) mkProject(result) else result
   }
 }
 

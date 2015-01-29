@@ -4,7 +4,7 @@ package com.inthenow.sbt.scalajs
 import sbt._
 import sbt.Keys._
 
-class RootBuild(m: CrossModuleOps) extends SharedBuildOps(m, "RootBuild") {
+class RootBuild(m: CrossModuleOps)( implicit log: Logger) extends SharedBuildOps(m, "RootBuild") {
 
   def mkProject(target:TargetOps , projects:Seq[Project]): Project =  {
     val p= target.projectOps
@@ -25,6 +25,7 @@ class RootBuild(m: CrossModuleOps) extends SharedBuildOps(m, "RootBuild") {
 }
 
 case object RootBuild extends SharedBuildType {
-  def getBuildOps(m: CrossModuleOps,projectType:Standard ) = new RootBuild(m)
-  def getBuildOps(m: CrossModuleOps,projectType:Shared):BuildOps =  new RootBuild(m)
+  def getBuildOps(m: CrossModuleOps, projectType:Empty)( implicit log: Logger): BuildOps = new RootBuild(m)
+  def getBuildOps(m: CrossModuleOps,projectType:Standard )( implicit log: Logger) = new RootBuild(m)
+  def getBuildOps(m: CrossModuleOps,projectType:Shared)( implicit log: Logger):BuildOps =  new RootBuild(m)
 }
