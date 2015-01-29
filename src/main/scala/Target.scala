@@ -14,6 +14,10 @@ abstract class  TargetOps(val target: Target,val projectOps: ProjectOps) {
       val cpd = projects.map(d => ClasspathDependency(d, Some("compile;test->test")))
       p.dependsOn(cpd: _*).aggregate(pr: _*)
     }
+    def addSubProjects(projects: Seq[Project]): Project = {
+      val deps = projects.foldLeft(Seq[ClasspathDep[ProjectReference]]())((s,p) => s ++ p.dependencies)
+      p.copy( dependencies =  p.dependencies ++ deps)
+    }
   }
 
   val targetType: TargetType = target.targetType
@@ -45,7 +49,9 @@ abstract class  TargetOps(val target: Target,val projectOps: ProjectOps) {
       settings = params.settings ++ buildInit ++ copyProject //).distinct
     )
 
-    val result = if(options.addProjects) p.addProjects(params.projects) else p
+    val result1 = if(options.addProjects) p.addProjects(params.projects) else p
+
+    val result = if(options.copyProject)  result1.addSubProjects(params.projects) else result1
 
     if (options.callPostTarget) mkProject(result) else result
   }

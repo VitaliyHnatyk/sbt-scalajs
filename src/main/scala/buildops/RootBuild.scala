@@ -9,7 +9,7 @@ class RootBuild(m: CrossModuleOps)( implicit log: Logger) extends SharedBuildOps
   def mkProject(target:TargetOps , projects:Seq[Project]): Project =  {
     val p= target.projectOps
     val params = p.targetProjectParams(target, true, Seq(), projects)
-    val options = p.targetProjectOptions.copy(hidden = true)
+    val options = p.targetProjectOptions.copy(hidden = true, addProjects = true)
 
     target.mkProject(this, params, options)
   }

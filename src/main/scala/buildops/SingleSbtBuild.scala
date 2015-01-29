@@ -11,6 +11,13 @@ class SingleBuild(m: CrossModuleOps, projectType:ProjectType)( implicit log: Log
 
     target.mkProject(this, params, options)
   }
+  override def getProjectBase(projectId: String, projectDir: String, hidden: Boolean): File = {
+    m.getBase
+  }
+
+  override def getProjectId(projectId: String, projectDir: String) = s"${projectId}"
+
+  override def getProjectName(projectId: String, projectDir: String) = s"${m.crossModule.modulePrefix}${projectId}"
 }
 
 case object SingleBuild extends BuildType {
