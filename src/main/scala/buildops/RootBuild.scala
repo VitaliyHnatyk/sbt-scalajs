@@ -4,11 +4,11 @@ package com.inthenow.sbt.scalajs
 import sbt._
 import sbt.Keys._
 
-class RootBuild(m: CrossModuleOps)( implicit log: Logger) extends SharedBuildOps(m, "RootBuild") {
+class RootBuild(m: CrossModuleOps)( implicit log: Logger) extends BuildOps(m, "RootBuild") {
 
   def mkProject(target:TargetOps , projects:Seq[Project]): Project =  {
     val p= target.projectOps
-    val params = p.targetProjectParams(target, true, Seq(), projects)
+    val params = p.targetProjectParams(target, true, p.projectNameSettings(target), projects)
     val options = p.targetProjectOptions.copy(hidden = true, addProjects = true)
 
     target.mkProject(this, params, options)

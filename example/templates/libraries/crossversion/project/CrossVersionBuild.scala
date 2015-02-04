@@ -11,7 +11,8 @@ object CrossversionBuild extends Build {
     organization := "com.github.CrossVersion",
     scalaVersion := "2.11.5",
     crossScalaVersions := Seq("2.11.5", "2.10.4"),
-    scalacOptions ++= Seq("-deprecation", "-unchecked")
+    scalacOptions ++= Seq("-deprecation", "-unchecked"),
+    resolvers += Resolver.url("inthenow-releases", url("http://dl.bintray.com/inthenow/releases"))(Resolver.ivyStylePatterns)
   )
 
   /**
@@ -45,7 +46,7 @@ object CrossversionBuild extends Build {
   lazy val dbModule = CrossModule(
     id              = "db",
     baseDir         = "db",
-    buildType           = CommonBaseBuild,
+    buildType       = SbtLinkedBuild,
     defaultSettings = buildSettings ++ SbtScalajs.XScalaMacroDependencies,
     modulePrefix    = "crossversion-")
 
@@ -53,7 +54,7 @@ object CrossversionBuild extends Build {
   lazy val dbJvm       = dbModule.project(Jvm, dbSharedJvm)
   lazy val dbJs        = dbModule.project(Js, dbSharedJs)
   lazy val dbSharedJvm = dbModule.project(Jvm, Shared).settings(libraryDependencies +=  scalaz)
-  lazy val dbSharedJs  = dbModule.project(Js, Shared, dbSharedJvm).settings(sclalajsDom ++ scalaz_js:_*)
+  lazy val dbSharedJs  = dbModule.project(Js, Shared, dbSharedJvm).settings(sclalajsDom:_*)
 
   /**
    * The Jena module, just a plain old JS/JVM  project

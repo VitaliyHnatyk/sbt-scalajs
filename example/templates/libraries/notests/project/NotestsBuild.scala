@@ -12,7 +12,8 @@ object NotestsBuild extends Build {
     organization := "com.github.notests",
     scalaVersion := "2.11.5",
     crossScalaVersions := Seq("2.11.5", "2.10.4"),
-    scalacOptions ++= Seq("-deprecation", "-unchecked")
+    scalacOptions ++= Seq("-deprecation", "-unchecked"),
+    resolvers += Resolver.url("inthenow-releases", url("http://dl.bintray.com/inthenow/releases"))(Resolver.ivyStylePatterns)
   )
 
   /**
@@ -54,7 +55,7 @@ object NotestsBuild extends Build {
   lazy val dbJvm       = dbM.project(Jvm, dbSharedJvm)
   lazy val dbJs        = dbM.project(Js, dbSharedJs)
   lazy val dbSharedJvm = dbM.project(Jvm, Shared).settings(libraryDependencies +=  scalaz)
-  lazy val dbSharedJs  = dbM.project(Js, Shared).settings(scalaz_js:_*)
+  lazy val dbSharedJs  = dbM.project(Js, Shared) //Todo: .settings(scalaz_js:_*)
 
   /**
    * The Jena module, just a plain old JS/JVM  project

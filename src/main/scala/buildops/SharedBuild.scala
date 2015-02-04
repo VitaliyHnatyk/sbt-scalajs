@@ -5,7 +5,7 @@ import SbtScalajs._
 class SharedBuild(m: CrossModuleOps)( implicit log: Logger) extends SharedBuildBase.Std(m, "SharedBuild") {
 }
 
-case object SharedBuild extends SharedBuildType {
+case object SharedBuild extends BuildType {
   def getBuildOps(m: CrossModuleOps,projectType:Empty)( implicit log: Logger) = new EmptyOps(m)
   def getBuildOps(m: CrossModuleOps,projectType:Standard)( implicit log: Logger) = new SharedBuild(m)
   def getBuildOps(m: CrossModuleOps,projectType:Shared)( implicit log: Logger) = new SharedOps(m)

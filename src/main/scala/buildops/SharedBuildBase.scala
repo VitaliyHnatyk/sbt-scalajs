@@ -4,7 +4,7 @@ import sbt._
 
 object SharedBuildBase {
 
-  def mkStdProject(b:BuildOps, target: TargetOps, projects: Seq[Project]): Project = {
+  def mkStdProject(b:BuildOps, target: TargetOps, projects: Seq[Project])( implicit log: Logger): Project = {
     val p = target.projectOps
     val options = p.targetProjectOptions
     val params = p.targetProjectParams(target, options.hidden, p.projectNameSettings(target), projects)

@@ -109,12 +109,16 @@ object SbtScalajs extends AutoPlugin {
   def addDirectories(base: File, dir: String = ".") = Seq(
     // pseudo link shared files from jvm source/resource directories to js
     unmanagedSourceDirectories in Compile += base / "src/main/scala" / dir,
+    unmanagedSourceDirectories in Compile += base / ("src/main/scala_" + scalaBinaryVersion.value) / dir,
+
     unmanagedSourceDirectories in Test += base / "src/test/scala" / dir,
+    unmanagedSourceDirectories in Test += base / s"src/test/scala_${scalaBinaryVersion.value}" / dir,
+
     unmanagedResourceDirectories in Compile += base / "src/main/resources" / dir,
     unmanagedResourceDirectories in Test += base / "src/test/resources" / dir
   )
 
-  def addRelDirectories(projBase: File, relPath: String, dir: String = ".") = {
+  def addRelDirectories(projBase: File, relPath: String, dir: String = ".")(implicit log:Logger) = {
     val fullPath =  projBase.getCanonicalFile / relPath
     addDirectories(fullPath, dir)
   }

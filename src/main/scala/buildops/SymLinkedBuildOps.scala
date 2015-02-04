@@ -33,7 +33,6 @@ case object SymLinkedBuild extends SharedBuildType {
   def getBuildOps(m: CrossModuleOps, projectType: Shared)(implicit log: Logger) = new SharedOps(m)
 
   class SharedOps(m: CrossModuleOps)(implicit log: Logger) extends LinkedBuildBase.SharedOps(m, "SymLinkedBuild") {
-
   }
 
   class EmptyOps(m: CrossModuleOps)(implicit log: Logger) extends EmptyBuildOps(m, "SbtLinkedBuild") {

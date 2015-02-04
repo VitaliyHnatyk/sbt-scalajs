@@ -2,18 +2,19 @@ package com.inthenow.sbt.scalajs
 
 
 import sbt._
+import sbt.Keys._
 
 class ModuleOps(target:Target, projectOps: ProjectOps) extends TargetOps(target, projectOps) {
 
   override def mkProject(b:BuildOps, params:ProjectParams, options: ProjectOptions): Project = {
-     b match {
-      //case s:RootBuild => println ("aa")
-      case _ =>  {
-        val p= projectOps.crossModuleParams(this,SbtScalajs.noRootSettings ++ projectOps.moduleNameSettings, params.projects)
-        val o = projectOps.crossModuleOptions.copy(addProjects = true)
-        super.mkProject(b,p,o)
-      }
+    val modName: Seq[Setting[_]] = b match {
+      case s:RootBuild => Seq(sbt.Keys.name := { s"${b.moduleOps.getModuleName()}_root" })
+      case _           =>  projectOps.moduleNameSettings
     }
+    val p= projectOps.crossModuleParams(this,SbtScalajs.noRootSettings ++ modName, params.projects)
+    val o = projectOps.crossModuleOptions.copy(addProjects = true)
+    super.mkProject(b,p,o)
+
   }
 }
 
