@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/inthenow/sbt-scalajs.png?label=ready&title=Ready)](https://waffle.io/inthenow/sbt-scalajs)
 sbt-scalajs
 =======
 
