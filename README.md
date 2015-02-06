@@ -1,8 +1,6 @@
-[![Stories in Ready](https://badge.waffle.io/inthenow/sbt-scalajs.png?label=ready&title=Ready)](https://waffle.io/inthenow/sbt-scalajs)
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/InTheNow/sbt-scalajs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Stories in Ready](https://badge.waffle.io/inthenow/sbt-scalajs.png?label=ready&title=Ready)](https://waffle.io/inthenow/sbt-scalajs)
 sbt-scalajs
 =======
-
-[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/InTheNow/sbt-scalajs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 An SBT plugin for [Scala,js](http://www.scala-js.org/).
 
