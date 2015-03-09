@@ -88,8 +88,9 @@ object SbtScalajs extends AutoPlugin {
       )
 
   val noPublishSettings = Seq(
-    publish := {},
-    publishLocal := {},
+    publish         := {},
+    publishLocal    := {},
+    publishArtifact := false,
     packageBin in Compile := file(""),
     packageDoc in Compile := file(""),
     packageSrc in Compile := file("")
